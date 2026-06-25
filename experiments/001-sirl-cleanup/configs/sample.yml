@@ -1,0 +1,28 @@
+experiment_name: model_baseline-pretrained_False-freeze_False-batch_32-gradclip_10-seed_2
+seed: 2
+load_checkpoint: ''
+load_checkpoints: []
+option: train
+data:
+  dataset_name: mnist
+  path: /nlp/scr/moussa/datasets/torch_data_cache
+  split: train
+  batch_size: 32
+  input_resize: 56
+  input_crop: ???
+model:
+  name: baseline
+  dropout_rate: 0.1
+  class_count: 10
+  backbone_model: resnet50
+  use_pretrained_backbone: false
+  freeze_backbone: false
+  tversky_projection_config: null
+optimizer:
+  learning_rate: 0.03
+  momentum: 0.9
+  weight_decay: 0.0001
+  clip_norm_threshold: 10.0
+  train_epochs: 200
+  eval_freq: 1
+  checkpoint_freq: 50
