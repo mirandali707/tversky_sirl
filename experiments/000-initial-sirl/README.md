@@ -1,3 +1,5 @@
+> The code in this experiment probably doesn't run as-is, Miranda copied it over directly from the SIRL repo and so the paths are all messed up. This is mostly here for documentation purposes.
+
 Miranda's (messy, sorry) experiments trying to simplify / replicate SIRL FPE results on human-labelled Jacorobot trajectory data,
 and subsequently integrate [Tversky similarity](https://mdoumbouya.github.io/article_0007_tversky_neural_networks.html).
 
