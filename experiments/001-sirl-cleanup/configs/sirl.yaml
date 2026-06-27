@@ -1,0 +1,17 @@
+experiment_name: sirl_gridrobot
+mode: train
+seed: 0
+data:
+    dataset_name: gridrobot_1960 
+    path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
+model:
+    name: sirl
+    num_epochs: 3000
+    lr: 0.004
+    lr_decay: 0.99999
+    margin: 0.1
+    latent_dim: 6
+    hidden_dim: 128
+    log_interval: 100
+    use_symmetric_loss: True
+    l2_weight: 0.0

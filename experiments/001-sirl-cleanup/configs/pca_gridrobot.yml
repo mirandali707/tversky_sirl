@@ -1,0 +1,8 @@
+experiment_name: pca_gridrobot
+mode: train
+seed: 0
+data:
+    dataset_name: gridrobot_1960 
+    path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
+model:
+    name: pca

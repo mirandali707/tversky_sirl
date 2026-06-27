@@ -1,6 +1,0 @@
-experiment_name: pca-baseline
-data:
-    dataset_name: jacorobot-human-trajs
-    path: /data/Data\ Uploads/
-model:
-    name: pca
