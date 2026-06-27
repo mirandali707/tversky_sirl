@@ -6,3 +6,4 @@ data:
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
     name: pca
+    n_components: 6
