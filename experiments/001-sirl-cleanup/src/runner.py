@@ -1,19 +1,6 @@
 import argparse
-from types import SimpleNamespace
-
 import yaml
-
 from data_utils import load_data
-
-
-# def _to_namespace(obj):
-#     """Recursively convert dicts to SimpleNamespace for dotted attribute access."""
-#     if isinstance(obj, dict):
-#         return SimpleNamespace(**{k: _to_namespace(v) for k, v in obj.items()})
-#     if isinstance(obj, list):
-#         return [_to_namespace(v) for v in obj]
-#     return obj
-
 
 def parse_config(path):
     with open(path) as f:
@@ -28,8 +15,9 @@ def parse_command_line_args():
 
 
 def main(config):
-    data = load_data(config)
-    return data
+    anchors, positives, negatives = load_data(config)
+    print("loaded")
+    print(anchors.shape)
 
 
 if __name__ == '__main__':
