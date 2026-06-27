@@ -1,7 +1,8 @@
 import argparse
 import yaml
 from data_utils import load_data
-from models import train_model
+from models import get_model
+from eval import eval_model
 
 def parse_config(path):
     with open(path) as f:
@@ -16,12 +17,9 @@ def parse_command_line_args():
 
 
 def main(config):
-    anchors, positives, negatives = load_data(config)
-    if config["mode"] == "train":
-        train_model(anchors, positives, negatives, config)
-    elif config["mode"] == "eval":
-        pass
-        # eval_model(config)
+    data = load_data(config)
+    model = get_model(config, data)
+    eval_model(config, data, model)
 
 
 if __name__ == '__main__':

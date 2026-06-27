@@ -1,9 +1,11 @@
 experiment_name: pca_gridrobot
-mode: train
 seed: 0
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
+    load_ckpt: False
     name: pca
     n_components: 6
+eval:
+    method: fpe

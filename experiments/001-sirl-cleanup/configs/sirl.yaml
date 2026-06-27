@@ -1,10 +1,10 @@
 experiment_name: sirl_gridrobot
-mode: train
 seed: 0
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
+    load_ckpt: False
     name: sirl
     num_epochs: 3000
     lr: 0.004
