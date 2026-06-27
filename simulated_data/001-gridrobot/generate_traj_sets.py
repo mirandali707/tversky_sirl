@@ -42,6 +42,26 @@ def set_seed(seed):
     np.random.seed(seed)
 
 
+def make_anchor_pos_neg(trajs, triplets, triplet_labels):
+    """
+    trajs has shape (n_trajs, 19)
+    triplets has indices of anchors, i, j (shape (n_triplets, 3))
+    triplet_labels is 0 if i is positive, 1 if j is positive (shape (n_triplets,))
+    returns three arrays: anchors, positives, negatives
+    each with shape (n_triplets, 19)
+    """
+    anchors = trajs[triplets[:, 0]]
+    i_trajs = trajs[triplets[:, 1]]
+    j_trajs = trajs[triplets[:, 2]]
+
+    # label 0 -> i is positive, label 1 -> j is positive
+    label = triplet_labels[:, None]
+    positives = np.where(label == 0, i_trajs, j_trajs)
+    negatives = np.where(label == 0, j_trajs, i_trajs)
+
+    return anchors, positives, negatives
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=str, default=None,
@@ -100,6 +120,10 @@ def main():
         triplets, tlabels = human.generate_triplet_labels(args.num_triplets)
         bundle["triplets"] = triplets
         bundle["triplet_labels"] = tlabels
+        anchors, positives, negatives = make_anchor_pos_neg(trajs, triplets, tlabels)
+        bundle["anchors"] = anchors
+        bundle["positives"] = positives
+        bundle["negatives"] = negatives
         print("labeled {} similarity triplets".format(len(tlabels)))
 
     # 4. Save everything to a single .npz bundle.
