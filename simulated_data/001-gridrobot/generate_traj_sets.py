@@ -34,6 +34,7 @@ DEFAULT_CONFIG = {
     "theta": [-10.0, -10.0],
     "beta": 10.0,
     "feature_scaling": "normalize",
+    "train_test_split": 0.8
 }
 
 
@@ -102,13 +103,26 @@ def main():
     human.set_trajset(trajs)
     rewards = human.reward_labels()
 
-    # 3. Generate human preference / triplet labels.
+    # 3. Split trajectories / features into train and test sets.
+    features = human.featurized_trajs
+    n = len(trajs)
+    perm = rng.permutation(n)
+    n_train = int(round(config["train_test_split"] * n))
+    train_idx, test_idx = perm[:n_train], perm[n_train:]
+    print("split {} trajectories into {} train / {} test".format(
+        n, len(train_idx), len(test_idx)))
+
+    # 4. Generate human preference / triplet labels.
     bundle = {
         "trajs": trajs,
-        "features": human.featurized_trajs,
+        "features": features,
         "rewards": rewards,
         "theta": np.asarray(config["theta"], dtype=float),
         "beta": np.asarray(config["beta"], dtype=float),
+        "train_trajs": trajs[train_idx],
+        "train_features": features[train_idx],
+        "test_trajs": trajs[test_idx],
+        "test_features": features[test_idx],
     }
     if args.num_prefs > 0:
         pairs, labels = human.generate_preference_labels(
@@ -118,15 +132,13 @@ def main():
         print("labeled {} preference pairs".format(len(labels)))
     if args.num_triplets > 0:
         triplets, tlabels = human.generate_triplet_labels(args.num_triplets)
-        bundle["triplets"] = triplets
-        bundle["triplet_labels"] = tlabels
         anchors, positives, negatives = make_anchor_pos_neg(trajs, triplets, tlabels)
         bundle["anchors"] = anchors
         bundle["positives"] = positives
         bundle["negatives"] = negatives
         print("labeled {} similarity triplets".format(len(tlabels)))
 
-    # 4. Save everything to a single .npz bundle.
+    # 5. Save everything to a single .npz bundle.
     here = os.path.dirname(os.path.abspath(__file__))
     save_dir = os.path.join(here, args.save_dir)
     os.makedirs(save_dir, exist_ok=True)
