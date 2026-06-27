@@ -12,7 +12,8 @@ def eval_model(config, data, model):
     if eval_params["method"] == "fpe":
         fpe = eval_fpe(config, data, model)
         print(f"fpe: {fpe}")
-        # TODO save eval
+        return {"fpe": fpe}
+    return {}
 
 
 def eval_fpe(config, data, model):

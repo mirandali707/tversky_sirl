@@ -5,12 +5,13 @@ from sklearn.decomposition import PCA
 def get_model(config, data):
     model_params = config["model"]
     if model_params["load_ckpt"]:
-        return load_model(config)
+        ckpt_path = model_params["ckpt_path"]
+        return load_model(ckpt_path), ckpt_path
     # if not loading model from ckpt, train model from scratch
     return train_model(config, data)
 
 
-def load_model(config):
+def load_model(ckpt_path):
     # TODO load model
     pass
 
@@ -18,6 +19,8 @@ def load_model(config):
 def train_model(config, data):
     """
     extract anchors, positives, negatives for training
+    train model
+    save model checkpoint, return model and checkpoint path
     """
     anchors = data["anchors"]
     positives = data["positives"]
@@ -28,7 +31,8 @@ def train_model(config, data):
         model = fit_pca(config, anchors, positives, negatives)
     
     # TODO save model checkpoint
-    return model
+    ckpt_path = "TEMP"
+    return model, ckpt_path
 
 
 def fit_pca(config, anchors, positives, negatives, n_components=6, random_state=42):

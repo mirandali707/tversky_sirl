@@ -1,11 +1,11 @@
 experiment_name: pca_gridrobot
-seed: 0
+seeds: [0, 1, 2, 3, 4]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
     load_ckpt: False
     name: pca
-    n_components: 6
+    n_components: 6 # TODO make this a list
 eval:
     method: fpe
