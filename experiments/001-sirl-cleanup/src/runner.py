@@ -23,6 +23,7 @@ def main(config):
 
     results_dir = Path("results") / config["experiment_name"]
     results_dir.mkdir(parents=True, exist_ok=True)
+    # TODO save metadata.json in results dir (config, datetime)
 
     rows = []
     for seed in config["seeds"]:
