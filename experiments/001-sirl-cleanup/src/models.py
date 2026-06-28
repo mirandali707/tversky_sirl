@@ -1,6 +1,7 @@
 from pca import *
 from sirl import train_sirl, load_sirl
 from tversky_sirl import train_tversky_sirl, load_tversky_sirl
+from tversky_sirl_2 import train_tversky_sirl_2, load_tversky_sirl_2
 
 
 def get_model(config, data, results_dir, seed):
@@ -31,6 +32,8 @@ def load_model(config):
         model = load_sirl(ckpt_path)
     if model_params["name"] == "tversky_sirl":
         model = load_tversky_sirl(ckpt_path)
+    if model_params["name"] == "tversky_sirl_2":
+        model = load_tversky_sirl_2(ckpt_path)
     return model, ckpt_path
 
 
@@ -60,6 +63,11 @@ def train_model(config, data, results_dir, seed):
     if model_params["name"] == "tversky_sirl":
         model, history = train_tversky_sirl(config, anchors, positives, negatives)
         ckpt_path = str(results_dir / f"tversky_sirl_dim{model.encoder[-1].out_features}_seed{seed}.pth")
+        model.save_model(ckpt_path)
+        # TODO save history? really i should learn how to use wandb
+    if model_params["name"] == "tversky_sirl_2":
+        model, history = train_tversky_sirl_2(config, anchors, positives, negatives)
+        ckpt_path = str(results_dir / f"tversky_sirl_2_dim{model_params["latent_dim"]}_seed{seed}.pth")
         model.save_model(ckpt_path)
         # TODO save history? really i should learn how to use wandb
     return model, ckpt_path

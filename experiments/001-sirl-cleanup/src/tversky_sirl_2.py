@@ -16,7 +16,7 @@ class TverskySIRL(nn.Module):
     distance for comparing trajectory embeddings.
     """
     def __init__(self, input_dim=567, hidden_dim=1024, latent_dim=6,
-                 fbank_size=4, similarity_model='contrast',
+                 fbank_size=128, similarity_model='contrast',
                  intersection_reduction='product',
                  difference_reduction='ignorematch',
                  normalize=False):
@@ -33,15 +33,17 @@ class TverskySIRL(nn.Module):
             'normalize': normalize,
         }
         self.encoder = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, latent_dim),
+            tnn.TverskyProjection(
+                embedding_dim=input_dim,
+                class_count=latent_dim, # prototype count
+                fbank_size=fbank_size, # embedding_dim = input_dim
+                similarity_model='contrast',
+                normalize=False
+            )
         )
         self.tversky_sim = tnn.TverskySimilarity(
             embedding_dim=latent_dim,
-            fbank_size=fbank_size,
+            fbank_size=4,
             similarity_model=similarity_model,
             normalize=normalize,
             intersection_reduction=intersection_reduction,
@@ -56,7 +58,7 @@ class TverskySIRL(nn.Module):
     def distance(self, a, b):
         """Tversky-based distance: lower = more similar (negate similarity)."""
         return -self.tversky_sim(a, b)
-
+        
     def save_model(self, path):
         """Save state_dict + constructor hparams so load_model can reconstruct exactly."""
         torch.save({
@@ -80,8 +82,9 @@ def asymmetric_triplet_loss(model, a_emb, p_emb, n_emb, margin=1.0):
     )
     return loss_fn(a_emb, p_emb, n_emb)
 
+
 @config_overridable
-def train_tversky_sirl(
+def train_tversky_sirl_2(
     config,
     anchors, positives, negatives,
     num_epochs=3000,
@@ -162,7 +165,8 @@ def train_tversky_sirl(
 
     return model, history
 
-def load_tversky_sirl(path, device=None):
+
+def load_tversky_sirl_2(path, device=None):
     ckpt = torch.load(path, map_location=device, weights_only=False)
     model = TverskySIRL(**ckpt['hparams'])
     model.load_state_dict(ckpt['state_dict'])

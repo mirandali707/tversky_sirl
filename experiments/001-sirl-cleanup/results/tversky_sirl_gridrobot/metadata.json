@@ -14,7 +14,7 @@
         },
         "model": {
             "load_ckpt": false,
-            "name": "tversky_sirl",
+            "name": "tversky_sirl_2",
             "num_epochs": 3000,
             "lr": 0.004,
             "lr_decay": 0.99999,
