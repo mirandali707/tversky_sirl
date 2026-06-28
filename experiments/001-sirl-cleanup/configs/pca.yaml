@@ -8,4 +8,5 @@ model:
     name: pca
     n_components: 6 # TODO make this a list
 eval:
-    method: fpe
+    - method: fpe
+    - method: tpa

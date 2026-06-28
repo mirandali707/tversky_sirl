@@ -1,6 +1,6 @@
-seed,ckpt_path,fpe
-0,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
-1,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
-2,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
-3,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
-4,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
+seed,ckpt_path,fpe,tpa
+0,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536,0.9150000214576721
+1,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536,0.9150000214576721
+2,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536,0.925000011920929
+3,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536,0.9100000262260437
+4,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536,0.9150000214576721

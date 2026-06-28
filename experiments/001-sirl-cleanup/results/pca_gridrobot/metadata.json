@@ -17,8 +17,13 @@
             "name": "pca",
             "n_components": 6
         },
-        "eval": {
-            "method": "fpe"
-        }
+        "eval": [
+            {
+                "method": "fpe"
+            },
+            {
+                "method": "tpa"
+            }
+        ]
     }
 }
