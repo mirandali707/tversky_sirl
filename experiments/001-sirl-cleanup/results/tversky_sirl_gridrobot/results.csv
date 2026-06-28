@@ -1,0 +1,6 @@
+seed,ckpt_path,fpe
+0,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed0.pth,0.17436614967326464
+1,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed1.pth,0.17761708944306748
+2,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed2.pth,0.17971023378432152
+3,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed3.pth,0.18028691948200057
+4,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed4.pth,0.17901924396574945
