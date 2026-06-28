@@ -1,5 +1,5 @@
 from pca import *
-from sirl import train_sirl, load_sirl
+from sirl import train_sirl, load_sirl, init_random_sirl
 from tversky_sirl import train_tversky_sirl, load_tversky_sirl
 from tversky_sirl_2 import train_tversky_sirl_2, load_tversky_sirl_2
 
@@ -24,6 +24,8 @@ def load_model(config):
     """
     model_params = config["model"]
     ckpt_path = model_params["ckpt_path"]
+    if model_params["name"] == "random":
+        model = load_sirl(ckpt_path)
     if model_params["name"] == "pca":
         # assumes ckpt_path points to .joblib file,
         model = load_pca(ckpt_path)
@@ -48,6 +50,11 @@ def train_model(config, data, results_dir, seed):
     negatives = data["negatives"]
 
     model_params = config["model"]
+    # random baseline (untrained sirl)
+    if model_params["name"] == "random":
+        model = init_random_sirl(config, anchors, positives, negatives)
+        ckpt_path = str(results_dir / f"random_dim{model.encoder[-1].out_features}_seed{seed}.pth")
+        model.save_model(ckpt_path)
     # PCA
     if model_params["name"] == "pca":
         model = fit_pca(config, anchors, positives, negatives)
@@ -65,6 +72,7 @@ def train_model(config, data, results_dir, seed):
         ckpt_path = str(results_dir / f"tversky_sirl_dim{model.encoder[-1].out_features}_seed{seed}.pth")
         model.save_model(ckpt_path)
         # TODO save history? really i should learn how to use wandb
+    # Tversky SIRL 2 (TverskyProjection instead of MLP, TverskySimilarity in triplet loss)
     if model_params["name"] == "tversky_sirl_2":
         model, history = train_tversky_sirl_2(config, anchors, positives, negatives)
         ckpt_path = str(results_dir / f"tversky_sirl_2_dim{model_params["latent_dim"]}_seed{seed}.pth")

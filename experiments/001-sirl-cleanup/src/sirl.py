@@ -71,6 +71,40 @@ def asymmetric_triplet_loss(anchor_emb, pos_emb, neg_emb, margin=1.0):
 
 
 @config_overridable
+def init_random_sirl(
+    config,
+    anchors, positives, negatives,
+    num_epochs=3000,
+    batch_size=64,
+    lr=0.004,
+    lr_decay=0.99999,
+    margin=0.1,
+    latent_dim=6,
+    hidden_dim=1024,
+    device='cuda' if torch.cuda.is_available() else 'cpu',
+    log_interval=100,
+    use_symmetric_loss=True,
+    l2_weight=0.0,
+):
+    A = torch.as_tensor(anchors, dtype=torch.float32, device=device)
+    P = torch.as_tensor(positives, dtype=torch.float32, device=device)
+    N = torch.as_tensor(negatives, dtype=torch.float32, device=device)
+
+    assert A.shape == P.shape == N.shape, f"shape mismatch: {A.shape}, {P.shape}, {N.shape}"
+
+    # flatten to 2d
+    A = A.flatten(start_dim=1)
+    P = P.flatten(start_dim=1)
+    N = N.flatten(start_dim=1)
+
+    input_dim = A.shape[1]
+    n_triplets = A.shape[0]
+    print(f"input dim: {input_dim}")
+    model = SIRL(input_dim=input_dim, hidden_dim=hidden_dim, latent_dim=latent_dim).to(device)
+    return model
+
+
+@config_overridable
 def train_sirl(
     config,
     anchors, positives, negatives,

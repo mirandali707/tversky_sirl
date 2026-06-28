@@ -1,0 +1,6 @@
+seed,ckpt_path,fpe
+0,results/random_gridrobot/random_dim6_seed0.pth,0.17692729965269538
+1,results/random_gridrobot/random_dim6_seed1.pth,0.17761708944306748
+2,results/random_gridrobot/random_dim6_seed2.pth,0.1787193347549804
+3,results/random_gridrobot/random_dim6_seed3.pth,0.17929939054349373
+4,results/random_gridrobot/random_dim6_seed4.pth,0.18054073730039638
