@@ -1,27 +1,39 @@
 import numpy as np
+import joblib
+from pathlib import Path
 from sklearn.decomposition import PCA
 
 
-def get_model(config, data):
+def get_model(config, data, results_dir):
+    """
+    loads model from checkpoint if "load_ckpt" is True, 
+    otherwise trains the model and saves it.
+    returns (model, ckpt_path) in both cases
+    """
     model_params = config["model"]
     if model_params["load_ckpt"]:
         return load_model(config)
     # if not loading model from ckpt, train model from scratch
-    return train_model(config, data)
+    return train_model(config, data, results_dir)
 
 
 def load_model(config):
-    # TODO load model
+    """
+    loads a saved model checkpoint.
+    - if model is PCA (config["model"]["name"] == "pca"), loads from .joblib
+    """
     model_params = config["model"]
     ckpt_path = model_params["ckpt_path"]
     if model_params["name"] == "pca":
-        model = None # TODO load pca sklearn style
+        # assumes ckpt_path points to .joblib file, 
+        # which is what train_model saves for pca
+        model = joblib.load(ckpt_path)
         return model, ckpt_path
-    model = None # TODO load model
+    model = None # TODO load torch model
     return model, ckpt_path
 
 
-def train_model(config, data):
+def train_model(config, data, results_dir):
     """
     extract anchors, positives, negatives for training
     train model
@@ -34,8 +46,10 @@ def train_model(config, data):
     model_params = config["model"]
     if model_params["name"] == "pca":
         model = fit_pca(config, anchors, positives, negatives)
-        # TODO save pca to {results_dir}/pca_{other params????? embed dim?}
-        ckpt_path = "PCA_PATH_TEMP"
+        # save fitted sklearn PCA; filename tags the embedding dim
+        ckpt_path = str(results_dir / f"pca_dim{model.n_components_}.joblib")
+        joblib.dump(model, ckpt_path)
+        print(f"saved pca to {ckpt_path}")
         return model, ckpt_path
 
     # TODO save model checkpoint
@@ -50,9 +64,9 @@ def fit_pca(config, anchors, positives, negatives, n_components=6, random_state=
     (for comparison to SIRL-type methods which actually use the triplet info)
     and fit PCA
     """
-    if "n_components" in config: 
+    if "n_components" in config["model"]: 
         n_components = config["n_components"]
-    if "random_state" in config: 
+    if "random_state" in config["model"]: 
         n_components = config["random_state"]
 
     query_trajs = np.concatenate([anchors, positives, negatives], axis=0)

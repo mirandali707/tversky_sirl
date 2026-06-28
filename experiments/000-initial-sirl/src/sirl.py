@@ -110,7 +110,7 @@ def train_sirl(
             for emb in (a_emb, p_emb, n_emb):
                 loss = loss + l2_weight * l2_fn(emb, torch.zeros_like(emb))
 
-        # TODO not handling skipped queries...
+        # NOTE not handling skipped queries...
 
         optimizer.zero_grad()
         loss.backward()

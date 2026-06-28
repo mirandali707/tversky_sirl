@@ -1,6 +1,6 @@
 seed,ckpt_path,fpe
-0,TEMP,0.1810586375061536
-1,TEMP,0.1810586375061536
-2,TEMP,0.1810586375061536
-3,TEMP,0.1810586375061536
-4,TEMP,0.1810586375061536
+0,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
+1,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
+2,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
+3,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536
+4,results/pca_gridrobot/pca_dim6.joblib,0.1810586375061536

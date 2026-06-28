@@ -1,5 +1,6 @@
 import argparse
 import yaml
+import json
 import pandas as pd
 from pathlib import Path
 from utils import *
@@ -23,16 +24,23 @@ def main(config):
 
     results_dir = Path("results") / config["experiment_name"]
     results_dir.mkdir(parents=True, exist_ok=True)
-    # TODO save metadata.json in results dir (config, datetime)
+
+    # save expt metadata in results dir
+    metadata_path = results_dir / "metadata.json"
+    metadata = {
+        "config": config
+    }
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file, indent=4)
 
     rows = []
     for seed in config["seeds"]:
         row = {
-            "seed": seed,
+            "seed": seed
         }
         set_all_seeds(seed)
 
-        model, ckpt_path = get_model(config, data)
+        model, ckpt_path = get_model(config, data, results_dir)
         row["ckpt_path"] = ckpt_path
 
         results = eval_model(config, data, model)

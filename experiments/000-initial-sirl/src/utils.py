@@ -42,7 +42,7 @@ def load_data(n_queries, data_dir=DATA_DIR, per_file=100, start_from_idx = 0):
     # concat queries from all files
     anchors, positives, negatives = (np.concatenate(all_anchors, axis=0), np.concatenate(all_pos, axis=0), np.concatenate(all_neg, axis=0))
     # jacorobot transform
-    # TODO add flag for whether to norm or not
+    # NOTE could add flag for whether to norm or not
     anchors, positives, negatives = tx(anchors), tx(positives), tx(negatives)
     return anchors, positives, negatives
 
