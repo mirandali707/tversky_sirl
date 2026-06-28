@@ -32,6 +32,18 @@ class SIRL(nn.Module):
             x = x.flatten(start_dim=1)
         z = self.encoder(x)
         return z
+    
+    def save_model(self, path):
+        """Save state_dict + constructor hparams so load_model can reconstruct exactly."""
+        torch.save({
+            'hparams': {
+                'input_dim': self.encoder[0].in_features,
+                'hidden_dim': self.encoder[0].out_features,
+                'latent_dim': self.encoder[-1].out_features,
+            },
+            'state_dict': self.state_dict(),
+        }, path)
+        print(f"model saved to {path}")
 
 
 def symmetric_triplet_loss(anchor_emb, pos_emb, neg_emb, margin=1.0):
@@ -145,11 +157,11 @@ def train_sirl(
     return model, history
 
 
-# ---------------- Run ----------------
-# if __name__ == "__main__":
-#     with np.load('sim_100_0.npz') as data:
-#         anchors = data['anchors']      # (100, 21, 97)
-#         positives = data['positives']
-#         negatives = data['negatives']
-
-#     model, history = train_sirl(anchors, positives, negatives)
+def load_sirl(path, device=None):
+    ckpt = torch.load(path, map_location=device, weights_only=False)
+    model = SIRL(**ckpt['hparams'])
+    model.load_state_dict(ckpt['state_dict'])
+    model.eval()
+    if device:
+        model = model.to(device)
+    return model

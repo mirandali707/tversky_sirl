@@ -1,12 +1,8 @@
-import numpy as np
-import joblib
-from pathlib import Path
-from sklearn.decomposition import PCA
-from utils import config_overridable
-from sirl import train_sirl
+from sirl import train_sirl, load_sirl
+from pca import *
 
 
-def get_model(config, data, results_dir):
+def get_model(config, data, results_dir, seed):
     """
     loads model from checkpoint if "load_ckpt" is True, 
     otherwise trains the model and saves it.
@@ -16,7 +12,7 @@ def get_model(config, data, results_dir):
     if model_params["load_ckpt"]:
         return load_model(config)
     # if not loading model from ckpt, train model from scratch
-    return train_model(config, data, results_dir)
+    return train_model(config, data, results_dir, seed)
 
 
 def load_model(config):
@@ -27,15 +23,15 @@ def load_model(config):
     model_params = config["model"]
     ckpt_path = model_params["ckpt_path"]
     if model_params["name"] == "pca":
-        # assumes ckpt_path points to .joblib file, 
-        # which is what train_model saves for pca
-        model = joblib.load(ckpt_path)
+        # assumes ckpt_path points to .joblib file,
+        model = load_pca(ckpt_path)
         return model, ckpt_path
-    model = None # TODO load torch model
+    # torch models (e.g. SIRL): assumes ckpt_path points to a .pth file
+    model = load_sirl(ckpt_path)
     return model, ckpt_path
 
 
-def train_model(config, data, results_dir):
+def train_model(config, data, results_dir, seed):
     """
     extract anchors, positives, negatives for training
     train model
@@ -49,31 +45,13 @@ def train_model(config, data, results_dir):
     # PCA
     if model_params["name"] == "pca":
         model = fit_pca(config, anchors, positives, negatives)
-        # save fitted sklearn PCA; filename tags the embedding dim
-        ckpt_path = str(results_dir / f"pca_dim{model.n_components_}.joblib")
-        joblib.dump(model, ckpt_path)
-        print(f"saved pca to {ckpt_path}")
+        ckpt_path = save_pca(model, results_dir)
         return model, ckpt_path
     # SIRL
     if model_params["name"] == "sirl":
         model, history = train_sirl(config, anchors, positives, negatives)
-        # TODO save model checkpoint
-        # model.save_model(f"{OUT_DIR}/tversky_4.pth")
+        ckpt_path = str(results_dir / f"sirl_dim{model.encoder[-1].out_features}_seed{seed}.pth")
+        model.save_model(ckpt_path)
         # TODO save history? really i should learn how to use wandb
-        ckpt_path = "SIRL_TEMP"
     return model, ckpt_path
 
-
-@config_overridable
-def fit_pca(config, anchors, positives, negatives, n_components=6, random_state=42):
-    """
-    combine anchors, positives, negatives 
-    (for comparison to SIRL-type methods which actually use the triplet info)
-    and fit PCA
-    """
-    query_trajs = np.concatenate([anchors, positives, negatives], axis=0)
-    X = query_trajs.reshape(len(query_trajs), -1)  # (N, 21*97) = (N, 2037)
-    pca = PCA(n_components=n_components, random_state=random_state)
-    pca.fit(X)
-    print("pca fit")
-    return pca

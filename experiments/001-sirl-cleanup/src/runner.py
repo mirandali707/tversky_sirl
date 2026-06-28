@@ -40,7 +40,7 @@ def main(config):
         }
         set_all_seeds(seed)
 
-        model, ckpt_path = get_model(config, data, results_dir)
+        model, ckpt_path = get_model(config, data, results_dir, seed)
         row["ckpt_path"] = ckpt_path
 
         results = eval_model(config, data, model)
