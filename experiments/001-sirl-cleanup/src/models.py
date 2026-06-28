@@ -2,6 +2,8 @@ import numpy as np
 import joblib
 from pathlib import Path
 from sklearn.decomposition import PCA
+from utils import config_overridable
+from sirl import train_sirl
 
 
 def get_model(config, data, results_dir):
@@ -44,6 +46,7 @@ def train_model(config, data, results_dir):
     negatives = data["negatives"]
 
     model_params = config["model"]
+    # PCA
     if model_params["name"] == "pca":
         model = fit_pca(config, anchors, positives, negatives)
         # save fitted sklearn PCA; filename tags the embedding dim
@@ -51,24 +54,23 @@ def train_model(config, data, results_dir):
         joblib.dump(model, ckpt_path)
         print(f"saved pca to {ckpt_path}")
         return model, ckpt_path
-
-    # TODO save model checkpoint
-    # model.save_model(f"{OUT_DIR}/tversky_4.pth")
-    ckpt_path = "TEMP"
+    # SIRL
+    if model_params["name"] == "sirl":
+        model, history = train_sirl(config, anchors, positives, negatives)
+        # TODO save model checkpoint
+        # model.save_model(f"{OUT_DIR}/tversky_4.pth")
+        # TODO save history? really i should learn how to use wandb
+        ckpt_path = "SIRL_TEMP"
     return model, ckpt_path
 
 
+@config_overridable
 def fit_pca(config, anchors, positives, negatives, n_components=6, random_state=42):
     """
     combine anchors, positives, negatives 
     (for comparison to SIRL-type methods which actually use the triplet info)
     and fit PCA
     """
-    if "n_components" in config["model"]: 
-        n_components = config["n_components"]
-    if "random_state" in config["model"]: 
-        n_components = config["random_state"]
-
     query_trajs = np.concatenate([anchors, positives, negatives], axis=0)
     X = query_trajs.reshape(len(query_trajs), -1)  # (N, 21*97) = (N, 2037)
     pca = PCA(n_components=n_components, random_state=random_state)

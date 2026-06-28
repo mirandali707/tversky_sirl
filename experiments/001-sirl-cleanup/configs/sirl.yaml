@@ -1,5 +1,5 @@
 experiment_name: sirl_gridrobot
-seed: 0
+seeds: [0, 1, 2, 3, 4]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
@@ -15,3 +15,5 @@ model:
     log_interval: 100
     use_symmetric_loss: True
     l2_weight: 0.0
+eval:
+    method: fpe
