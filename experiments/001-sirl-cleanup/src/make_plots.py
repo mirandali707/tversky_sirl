@@ -30,9 +30,14 @@ def load_all_results():
         if not csv_path.exists():
             continue
         df = pd.read_csv(csv_path)
+        df["base_method"] = base_name
         df["method"] = [_method_label(base_name, row) for _, row in df.iterrows()]
         frames.append(df)
     return pd.concat(frames, ignore_index=True)
+
+
+# base method names that sweep over fbank_size
+TVERSKY_METHODS = ["tversky_sirl", "tversky_sirl_2"]
 
 
 def _method_label(base_name, row):
@@ -55,6 +60,19 @@ def average_over_seeds(df):
     )
 
 
+def average_over_seeds_by_fbank(df):
+    """Mean fpe and tpa per (base_method, latent_dim, fbank_size).
+
+    Keeps fbank_size as its own dimension (instead of folding it into the
+    method name) so we can plot metric-vs-fbank curves for the tversky methods.
+    """
+    tversky = df[df["base_method"].isin(TVERSKY_METHODS)]
+    return (
+        tversky.groupby(["base_method", "latent_dim", "fbank_size"], as_index=False)
+        .agg(fpe=("fpe", "mean"), tpa=("tpa_mean", "mean"))
+    )
+
+
 def plot_metric(df_dim, dim, metric, title_label):
     """Bar chart of `metric` for each method at a fixed latent dim."""
     df_sorted = df_dim.sort_values(metric, ascending=False)
@@ -73,9 +91,36 @@ def plot_metric(df_dim, dim, metric, title_label):
     return fig
 
 
+def plot_metric_vs_fbank(df_method, base_method, metric, title_label):
+    """Line chart of `metric` vs fbank_size, one line per latent_dim."""
+    df_sorted = df_method.sort_values(["latent_dim", "fbank_size"])
+    fig = px.line(
+        df_sorted,
+        x="fbank_size",
+        y=metric,
+        color="latent_dim",
+        markers=True,
+        title=f"gridrobot {base_method} {title_label} vs feature bank size",
+    )
+    fig.update_layout(
+        xaxis_title="feature bank size",
+        yaxis_title=title_label,
+        legend_title="latent dim",
+    )
+    fig.update_xaxes(type="category")
+    return fig
+
+
 def save_fig(fig, dim, metric):
     FIGS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = FIGS_DIR / f"gridrobot_{metric}_dim{dim}.png"
+    fig.write_image(str(out_path))
+    return out_path
+
+
+def save_fbank_fig(fig, base_method, metric):
+    FIGS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = FIGS_DIR / f"gridrobot_{base_method}_{metric}_vs_fbank.png"
     fig.write_image(str(out_path))
     return out_path
 
@@ -105,6 +150,17 @@ def main():
         for metric in ("fpe", "tpa"):
             fig = plot_metric(df_dim, dim, metric, metric)
             out_path = save_fig(fig, dim, metric)
+            print(f"saved {out_path}")
+
+    # tversky-only: metric vs feature bank size, one line per latent dim
+    by_fbank = average_over_seeds_by_fbank(df)
+    for base_method in TVERSKY_METHODS:
+        df_method = by_fbank[by_fbank["base_method"] == base_method]
+        if df_method.empty:
+            continue
+        for metric in ("fpe", "tpa"):
+            fig = plot_metric_vs_fbank(df_method, base_method, metric, metric)
+            out_path = save_fbank_fig(fig, base_method, metric)
             print(f"saved {out_path}")
 
 
