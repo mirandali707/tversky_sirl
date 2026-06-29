@@ -69,13 +69,13 @@ def train_model(config, data, results_dir, seed):
     # Tversky SIRL (TverskySimilarity in triplet loss)
     if model_params["name"] == "tversky_sirl":
         model, history = train_tversky_sirl(config, anchors, positives, negatives)
-        ckpt_path = str(results_dir / f"tversky_sirl_dim{model.encoder[-1].out_features}_seed{seed}.pth")
+        ckpt_path = str(results_dir / f"tversky_sirl_dim{model.encoder[-1].out_features}_fbank{model_params["fbank_size"]}_seed{seed}.pth")
         model.save_model(ckpt_path)
         # TODO save history? really i should learn how to use wandb
     # Tversky SIRL 2 (TverskyProjection instead of MLP, TverskySimilarity in triplet loss)
     if model_params["name"] == "tversky_sirl_2":
         model, history = train_tversky_sirl_2(config, anchors, positives, negatives)
-        ckpt_path = str(results_dir / f"tversky_sirl_2_dim{model_params["latent_dim"]}_seed{seed}.pth")
+        ckpt_path = str(results_dir / f"tversky_sirl_2_dim{model_params["latent_dim"]}_fbank{model_params["fbank_size"]}_seed{seed}.pth")
         model.save_model(ckpt_path)
         # TODO save history? really i should learn how to use wandb
     return model, ckpt_path
