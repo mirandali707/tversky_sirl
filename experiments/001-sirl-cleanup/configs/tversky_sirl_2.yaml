@@ -1,4 +1,4 @@
-experiment_name: tversky_sirl_gridrobot
+experiment_name: tversky_sirl_2_gridrobot
 seeds: [0, 1, 2, 3, 4]
 data:
     dataset_name: gridrobot_1960 
@@ -20,4 +20,5 @@ model:
     intersection_reduction: product
     difference_reduction: substractmatch
 eval:
-    method: fpe
+    - method: fpe
+    - method: tpa

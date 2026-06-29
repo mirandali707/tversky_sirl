@@ -1,6 +1,6 @@
 {
     "config": {
-        "experiment_name": "sirl_gridrobot",
+        "experiment_name": "tversky_sirl_2_gridrobot",
         "seeds": [
             0,
             1,
@@ -14,7 +14,7 @@
         },
         "model": {
             "load_ckpt": false,
-            "name": "sirl",
+            "name": "tversky_sirl_2",
             "num_epochs": 3000,
             "lr": 0.004,
             "lr_decay": 0.99999,
@@ -23,7 +23,11 @@
             "hidden_dim": 128,
             "log_interval": 100,
             "use_symmetric_loss": true,
-            "l2_weight": 0.0
+            "l2_weight": 0.0,
+            "fbank_size": 4,
+            "similarity_model": "contrast",
+            "intersection_reduction": "product",
+            "difference_reduction": "substractmatch"
         },
         "eval": [
             {

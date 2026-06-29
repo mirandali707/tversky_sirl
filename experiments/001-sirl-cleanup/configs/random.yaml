@@ -16,4 +16,5 @@ model:
     use_symmetric_loss: True
     l2_weight: 0.0
 eval:
-    method: fpe
+    - method: fpe
+    - method: tpa

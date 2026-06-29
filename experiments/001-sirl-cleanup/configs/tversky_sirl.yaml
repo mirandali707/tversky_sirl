@@ -20,4 +20,5 @@ model:
     intersection_reduction: product
     difference_reduction: substractmatch
 eval:
-    method: fpe
+    - method: fpe
+    - method: tpa
