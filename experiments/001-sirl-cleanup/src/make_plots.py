@@ -55,7 +55,7 @@ def average_over_seeds(df):
     seeds to get a single tpa value per method/dim.
     """
     return (
-        df.groupby(["method", "latent_dim"], as_index=False)
+        df.groupby(["base_method", "method", "latent_dim"], as_index=False)
         .agg(fpe=("fpe", "mean"), tpa=("tpa_mean", "mean"))
     )
 
@@ -111,6 +111,38 @@ def plot_metric_vs_fbank(df_method, base_method, metric, title_label):
     return fig
 
 
+def plot_metric_vs_dim(averaged, metric, title_label):
+    """Line chart of `metric` vs latent_dim, one line per method.
+
+    Tversky fbank variants are drawn as separate lines but share a single
+    color per base method, so the legend stays readable.
+    """
+    df_sorted = averaged.sort_values(["base_method", "method", "latent_dim"])
+    fig = px.line(
+        df_sorted,
+        x="latent_dim",
+        y=metric,
+        color="base_method",
+        line_group="method",
+        markers=True,
+        title=f"gridrobot {title_label} vs representation dim",
+    )
+    fig.update_layout(
+        xaxis_title="representation dim",
+        yaxis_title=title_label,
+        legend_title="method",
+    )
+    fig.update_xaxes(type="category")
+    return fig
+
+
+def save_metric_vs_dim_fig(fig, metric):
+    FIGS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = FIGS_DIR / f"gridrobot_{metric}_vs_dim.png"
+    fig.write_image(str(out_path))
+    return out_path
+
+
 def save_fig(fig, dim, metric):
     FIGS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = FIGS_DIR / f"gridrobot_{metric}_dim{dim}.png"
@@ -151,6 +183,12 @@ def main():
             fig = plot_metric(df_dim, dim, metric, metric)
             out_path = save_fig(fig, dim, metric)
             print(f"saved {out_path}")
+
+    # metric vs latent dim, one line per method (tversky fbanks share a color)
+    for metric in ("fpe", "tpa"):
+        fig = plot_metric_vs_dim(averaged, metric, metric)
+        out_path = save_metric_vs_dim_fig(fig, metric)
+        print(f"saved {out_path}")
 
     # tversky-only: metric vs feature bank size, one line per latent dim
     by_fbank = average_over_seeds_by_fbank(df)
