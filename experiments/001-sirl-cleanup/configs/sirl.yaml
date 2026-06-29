@@ -1,12 +1,12 @@
 experiment_name: sirl_gridrobot
-seeds: [0, 1, 2, 3, 4]
+seeds: [0, 1, 2]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
     load_ckpt: False
     name: sirl
-    latent_dim: 6
+    latent_dim: [2, 4, 6, 8, 10]
     num_epochs: 3000
     lr: 0.004
     lr_decay: 0.99999

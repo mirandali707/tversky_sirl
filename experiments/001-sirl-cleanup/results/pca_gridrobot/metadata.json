@@ -4,9 +4,7 @@
         "seeds": [
             0,
             1,
-            2,
-            3,
-            4
+            2
         ],
         "data": {
             "dataset_name": "gridrobot_1960",
@@ -15,7 +13,13 @@
         "model": {
             "load_ckpt": false,
             "name": "pca",
-            "n_components": 6
+            "latent_dim": [
+                2,
+                4,
+                6,
+                8,
+                10
+            ]
         },
         "eval": [
             {

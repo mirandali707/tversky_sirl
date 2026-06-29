@@ -1,0 +1,5 @@
+seed,latent_dim,fbank_size,ckpt_path,fpe
+0,3,8,results/tversky_sirl_gridrobot/tversky_sirl_dim3_seed0.pth,0.17836900964257568
+0,3,16,results/tversky_sirl_gridrobot/tversky_sirl_dim3_seed0.pth,0.1787071824731311
+0,5,8,results/tversky_sirl_gridrobot/tversky_sirl_dim5_seed0.pth,0.1797649130353983
+0,5,16,results/tversky_sirl_gridrobot/tversky_sirl_dim5_seed0.pth,0.17865818239860615

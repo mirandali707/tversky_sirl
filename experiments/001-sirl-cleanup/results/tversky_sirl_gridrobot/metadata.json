@@ -2,7 +2,9 @@
     "config": {
         "experiment_name": "tversky_sirl_gridrobot",
         "seeds": [
-            0
+            0,
+            1,
+            2
         ],
         "data": {
             "dataset_name": "gridrobot_1960",
@@ -12,8 +14,11 @@
             "load_ckpt": false,
             "name": "tversky_sirl",
             "latent_dim": [
-                3,
-                5
+                2,
+                4,
+                6,
+                8,
+                10
             ],
             "num_epochs": 3000,
             "lr": 0.004,
@@ -24,6 +29,8 @@
             "use_symmetric_loss": true,
             "l2_weight": 0.0,
             "fbank_size": [
+                2,
+                4,
                 8,
                 16
             ],
@@ -34,6 +41,9 @@
         "eval": [
             {
                 "method": "fpe"
+            },
+            {
+                "method": "tpa"
             }
         ]
     }

@@ -63,6 +63,7 @@ def main(config):
         json.dump(metadata, file, indent=4)
 
     rows = []
+    results_path = results_dir / "results.csv"
     for param_permutation in get_all_model_configs(config):
         # overwrite the varying params inside config["model"] (where get_model reads them),
         curr_config = config | {"model": config["model"] | param_permutation}
@@ -78,10 +79,8 @@ def main(config):
             results = eval_model(curr_config, data, model)
             row = row | results # add results to row
             rows.append(row)
-
-    results_df = pd.DataFrame(rows)
-    results_path = results_dir / "results.csv"
-    results_df.to_csv(results_path, index=False)
+            results_df = pd.DataFrame(rows)
+            results_df.to_csv(results_path, index=False)
     print(f"saved results to {results_path}")
 
 

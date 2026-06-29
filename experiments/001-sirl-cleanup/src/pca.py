@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 @config_overridable
-def fit_pca(config, anchors, positives, negatives, out_dim=6, random_state=42):
+def fit_pca(config, anchors, positives, negatives, latent_dim=6, random_state=42):
     """
     combine anchors, positives, negatives 
     (for comparison to SIRL-type methods which actually use the triplet info)
@@ -12,7 +12,7 @@ def fit_pca(config, anchors, positives, negatives, out_dim=6, random_state=42):
     """
     query_trajs = np.concatenate([anchors, positives, negatives], axis=0)
     X = query_trajs.reshape(len(query_trajs), -1)  # (N, 21*97) = (N, 2037)
-    pca = PCA(n_components=out_dim, random_state=random_state)
+    pca = PCA(n_components=latent_dim, random_state=random_state)
     pca.fit(X)
     print("pca fit")
     return pca

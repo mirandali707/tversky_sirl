@@ -1,12 +1,12 @@
 experiment_name: tversky_sirl_gridrobot
-seeds: [0]
+seeds: [0, 1, 2]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
     load_ckpt: False
     name: tversky_sirl
-    latent_dim: [3,5] 
+    latent_dim: [2, 4, 6, 8, 10]
     num_epochs: 3000
     lr: 0.004
     lr_decay: 0.99999
@@ -15,10 +15,10 @@ model:
     log_interval: 100
     use_symmetric_loss: True
     l2_weight: 0.0
-    fbank_size: [8,16] 
+    fbank_size: [2, 4, 8, 16] 
     similarity_model: contrast
     intersection_reduction: product
     difference_reduction: substractmatch
 eval:
     - method: fpe
-    # - method: tpa
+    - method: tpa

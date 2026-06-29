@@ -1,0 +1,29 @@
+{
+    "config": {
+        "experiment_name": "pca_gridrobot",
+        "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "data": {
+            "dataset_name": "gridrobot_1960",
+            "path": "simulated_data/001-gridrobot/data/gridrobot_1960.npz"
+        },
+        "model": {
+            "load_ckpt": false,
+            "name": "pca",
+            "n_components": 6
+        },
+        "eval": [
+            {
+                "method": "fpe"
+            },
+            {
+                "method": "tpa"
+            }
+        ]
+    }
+}

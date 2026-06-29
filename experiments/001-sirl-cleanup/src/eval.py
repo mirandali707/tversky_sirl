@@ -22,7 +22,12 @@ def eval_model(config, data, model):
         if method == "tpa":
             tpa = eval_tpa(config, data, model)
             print(f"tpa: {tpa}")
-            all_eval = all_eval | {"tpa": tpa}
+            tpa_dict = {
+                "tpa": tpa,
+                "tpa_mean": np.mean(tpa),
+                "tpa_std": np.std(tpa)
+            }
+            all_eval = all_eval | tpa_dict
     return all_eval
 
 
