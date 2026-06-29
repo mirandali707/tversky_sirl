@@ -30,8 +30,15 @@ DEFAULT_CONFIG = {
     "starts": [[0, 0], [0, 4], [4, 0], [4, 4]],
     "goals": [[4, 4], [4, 0], [0, 4], [0, 0]],
     "features": ["computer_dist", "joint_up"],
-    # One reward weight per feature.
-    "theta": [-10.0, -10.0],
+    "thetas": [[ -10.0, -10.0 ],
+              [ 0.0, -10.0 ],
+              [ 10.0, -10.0 ],
+              [ -10.0, 0.0 ],
+              [ 10.0, 0.0 ],
+              [ -10.0, 10.0 ],
+              [ 0.0, 10.0 ],
+              [ 10.0, 10.0 ]
+    ],
     "beta": 10.0,
     "feature_scaling": "normalize",
     "train_test_split": 0.8
@@ -96,15 +103,16 @@ def main():
     print("generated {} trajectories of dim {} ({} waypoints + joint angle)".format(
         len(trajs), trajs.shape[1], (trajs.shape[1] - 1) // 2))
 
-    # 2. Build the synthetic human and featurize / score the trajectories.
-    human = GridrobotHuman(env, features=config["features"], theta=config["theta"],
+    # 2. Build the synthetic human and featurize the trajectories. Featurization
+    #    is theta-independent, so we share one human and swap theta per set.
+    thetas = [np.asarray(t, dtype=float) for t in config["thetas"]]
+    human = GridrobotHuman(env, features=config["features"], theta=thetas[0],
                            beta=config["beta"], feature_scaling=config["feature_scaling"],
                            rng=rng)
     human.set_trajset(trajs)
-    rewards = human.reward_labels()
+    features = human.featurized_trajs
 
     # 3. Split trajectories / features into train and test sets.
-    features = human.featurized_trajs
     n = len(trajs)
     perm = rng.permutation(n)
     n_train = int(round(config["train_test_split"] * n))
@@ -116,20 +124,30 @@ def main():
     bundle = {
         "trajs": trajs,
         "features": features,
-        "rewards": rewards,
-        "theta": np.asarray(config["theta"], dtype=float),
         "beta": np.asarray(config["beta"], dtype=float),
         "train_trajs": trajs[train_idx],
         "train_features": features[train_idx],
         "test_trajs": trajs[test_idx],
         "test_features": features[test_idx],
     }
+    # One reward vector and theta per entry in the nested `thetas` list.
+    for i, theta in enumerate(thetas):
+        human.theta = theta
+        bundle["theta_{}".format(i)] = theta
+        bundle["rewards_{}".format(i)] = human.reward_labels()
     if args.num_prefs > 0:
-        pairs, labels = human.generate_preference_labels(
+        # Shared pairs across thetas; one label set per theta.
+        pairs, _ = human.generate_preference_labels(
             args.num_prefs, noisy=not args.noiseless)
         bundle["pref_pairs"] = pairs
-        bundle["pref_labels"] = labels
-        print("labeled {} preference pairs".format(len(labels)))
+        for i, theta in enumerate(thetas):
+            human.theta = theta
+            labels = np.array([
+                human.query_pref(trajs[a], trajs[b], noisy=not args.noiseless)
+                for a, b in pairs])
+            bundle["pref_labels_{}".format(i)] = labels
+        print("labeled {} preference pairs for {} thetas".format(
+            len(pairs), len(thetas)))
     if args.num_triplets > 0:
         triplets, tlabels = human.generate_triplet_labels(args.num_triplets)
         anchors, positives, negatives = make_anchor_pos_neg(trajs, triplets, tlabels)
@@ -148,7 +166,7 @@ def main():
 
     if args.visualize:
         im_path = os.path.join(save_dir, "gridrobot_{}.png".format(len(trajs)))
-        env.visualize(trajs, rewards, im_path=im_path)
+        env.visualize(trajs, bundle["rewards_0"], im_path=im_path)
         print("saved visualization -> {}".format(im_path))
 
 
