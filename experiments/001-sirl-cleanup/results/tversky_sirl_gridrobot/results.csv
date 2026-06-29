@@ -1,6 +1,5 @@
-seed,ckpt_path,fpe,tpa
-0,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed0.pth,0.17436614967326464,0.6000000238418579
-1,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed1.pth,0.17761708944306748,0.7699999809265137
-2,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed2.pth,0.17971023378432152,0.6850000023841858
-3,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed3.pth,0.18028691948200057,0.625
-4,results/tversky_sirl_gridrobot/tversky_sirl_dim6_seed4.pth,0.17901924396574945,0.5950000286102295
+seed,latent_dim,fbank_size,ckpt_path,fpe
+0,3,8,results/tversky_sirl_gridrobot/tversky_sirl_dim3_seed0.pth,0.17836900964257568
+0,3,16,results/tversky_sirl_gridrobot/tversky_sirl_dim3_seed0.pth,0.1787071824731311
+0,5,8,results/tversky_sirl_gridrobot/tversky_sirl_dim5_seed0.pth,0.1797649130353983
+0,5,16,results/tversky_sirl_gridrobot/tversky_sirl_dim5_seed0.pth,0.17865818239860615

@@ -1,6 +1,7 @@
 import argparse
 import yaml
 import json
+import itertools
 import pandas as pd
 from pathlib import Path
 from utils import *
@@ -19,6 +20,34 @@ def parse_command_line_args():
     return parser.parse_args()
 
 
+def get_all_model_configs(config):
+    """
+    enumerates all possible combinations of parameter values from the "model" section of the config.
+    for example, if we have
+    { ...
+        latent_dim: [3,5],
+        fbank_size: [8,16]  
+    ...}
+    this will return the list of dicts 
+    [
+    {"latent_dim": 3, "fbank_size: 8},
+    {"latent_dim": 5, "fbank_size: 8},
+    {"latent_dim": 3, "fbank_size: 16},
+    {"latent_dim": 5, "fbank_size: 16},
+    ]
+
+    only params whose value is a list are treated as varying; everything else
+    is held fixed and left out of the returned dicts. if no params are lists,
+    returns [{}] so the caller still runs exactly one configuration.
+    """
+    model_params = config["model"]
+    list_keys = [k for k, v in model_params.items() if isinstance(v, list)]
+    if not list_keys:
+        return [{}]
+    list_values = [model_params[k] for k in list_keys]
+    return [dict(zip(list_keys, combo))
+            for combo in itertools.product(*list_values)]
+
 def main(config):
     data = load_data(config)
 
@@ -34,18 +63,21 @@ def main(config):
         json.dump(metadata, file, indent=4)
 
     rows = []
-    for seed in config["seeds"]:
-        row = {
-            "seed": seed
-        }
-        set_all_seeds(seed)
+    for param_permutation in get_all_model_configs(config):
+        # overwrite the varying params inside config["model"] (where get_model reads them),
+        curr_config = config | {"model": config["model"] | param_permutation}
+        for seed in config["seeds"]:
+            row = {
+                "seed": seed,
+            } | param_permutation # add this permutation of listed params to the row
+            set_all_seeds(seed)
 
-        model, ckpt_path = get_model(config, data, results_dir, seed)
-        row["ckpt_path"] = ckpt_path
+            model, ckpt_path = get_model(curr_config, data, results_dir, seed)
+            row["ckpt_path"] = ckpt_path
 
-        results = eval_model(config, data, model)
-        row = row | results # add results to row
-        rows.append(row)
+            results = eval_model(curr_config, data, model)
+            row = row | results # add results to row
+            rows.append(row)
 
     results_df = pd.DataFrame(rows)
     results_path = results_dir / "results.csv"

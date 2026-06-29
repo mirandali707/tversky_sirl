@@ -33,7 +33,7 @@ def set_all_seeds(seed):
 def config_overridable(fn):
     """
     override fn params with matching keys from config['model'].
-    used for fns that train models, e.g. overriding n_components in models.py:fit_pca
+    used for fns that train models, e.g. overriding use_symmetric_loss in models.py:train_sirl
     """
     sig = inspect.signature(fn)
     @functools.wraps(fn)

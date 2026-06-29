@@ -6,6 +6,7 @@ data:
 model:
     load_ckpt: False
     name: pca
-    n_components: 6 # add other model params to this section
+    latent_dim: 6 # representation size
+    # add other model params to this section
 eval:
     method: fpe

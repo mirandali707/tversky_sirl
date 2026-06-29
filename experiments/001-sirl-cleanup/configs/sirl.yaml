@@ -6,11 +6,11 @@ data:
 model:
     load_ckpt: False
     name: sirl
+    latent_dim: 6
     num_epochs: 3000
     lr: 0.004
     lr_decay: 0.99999
     margin: 0.1
-    latent_dim: 6
     hidden_dim: 128
     log_interval: 100
     use_symmetric_loss: True
