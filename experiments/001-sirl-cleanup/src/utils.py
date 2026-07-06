@@ -4,6 +4,13 @@ import torch
 from pathlib import Path
 import functools
 import inspect
+import yaml
+
+
+def parse_config(path):
+    with open(path) as f:
+        return yaml.safe_load(f)
+
 
 # Repository root, used to resolve data paths in configs (which are relative to it).
 # data_utils.py lives at <repo>/experiments/001-sirl-cleanup/src/data_utils.py
