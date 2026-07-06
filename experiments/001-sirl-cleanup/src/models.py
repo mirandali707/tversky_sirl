@@ -19,6 +19,10 @@ def get_model(config, data, results_dir, seed):
 
 def load_model(config):
     """
+    NOTE this has not been useful yet, could be deleted in the future.
+    wrote it to prep for potentially running more evals on trained models, but adding the ckpt_path to the config may be more pain than it's worth. 
+    see `load_model_only` below for a potential replacement
+    =====
     loads a saved model checkpoint.
     - if model is PCA (config["model"]["name"] == "pca"), loads from .joblib
     """
@@ -37,6 +41,27 @@ def load_model(config):
     if model_params["name"] == "tversky_sirl_2":
         model = load_tversky_sirl_2(ckpt_path)
     return model, ckpt_path
+    
+
+def load_model_only(train_config, ckpt_path):
+    """
+    loads a saved model checkpoint.
+    - if model is PCA (config["model"]["name"] == "pca"), loads from .joblib
+    """
+    model_params = train_config["model"]
+    if model_params["name"] == "random":
+        model = load_sirl(ckpt_path)
+    if model_params["name"] == "pca":
+        # assumes ckpt_path points to .joblib file,
+        model = load_pca(ckpt_path)
+        return model, ckpt_path
+    if model_params["name"] == "sirl":
+        model = load_sirl(ckpt_path)
+    if model_params["name"] == "tversky_sirl":
+        model = load_tversky_sirl(ckpt_path)
+    if model_params["name"] == "tversky_sirl_2":
+        model = load_tversky_sirl_2(ckpt_path)
+    return model
 
 
 def train_model(config, data, results_dir, seed):
