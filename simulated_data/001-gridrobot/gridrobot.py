@@ -88,3 +88,31 @@ class Gridrobot(Gridworld):
         else:
             plt.show()
         plt.close()
+
+
+    def visualize_one_traj(self, traj, rews, im_path=None, max_display=20):
+        """Plot the highest-reward trajectories, colored by their joint angle."""
+        trajs = np.asarray(trajs)
+        rews = np.asarray(rews)
+
+        world = 0.5 * np.ones((self.Y, self.X))
+        for obstacle in (self.obstacles or []):
+            lower, upper = obstacle[0], obstacle[1]
+            world[upper[1]:lower[1] + 1, lower[0]:upper[0] + 1] = 1.0
+        plt.imshow(world, cmap='Greys', interpolation='nearest')
+
+        joint = traj[-1]
+        path = traj[:-1]
+        plt.scatter(path[0], path[1], color="orange", marker="o", s=100)
+        plt.scatter(path[-2], path[-1], color="orange", marker="x", s=300)
+        traj_x = path[0::2]
+        traj_y = path[1::2]
+        plt.plot(traj_x, traj_y, c=self.joint_dict[joint], linewidth=3,
+                    alpha=max(1 / max_display, 0.05))
+
+        plt.grid(alpha=0.3)
+        if im_path is not None:
+            plt.savefig(im_path)
+        else:
+            plt.show()
+        plt.close()
