@@ -1,5 +1,4 @@
 import argparse
-import yaml
 import json
 import itertools
 import pandas as pd
@@ -7,10 +6,6 @@ from pathlib import Path
 from utils import *
 from models import get_model
 from eval import eval_model
-
-def parse_config(path):
-    with open(path) as f:
-        return yaml.safe_load(f)
 
 
 def parse_command_line_args():
