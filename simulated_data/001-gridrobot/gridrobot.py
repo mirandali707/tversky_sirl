@@ -26,6 +26,10 @@ class Gridrobot(Gridworld):
                   1.0472: "orange",
                   1.5708: "red"}
 
+    def _joint_color(self, joint):
+        """look up joint color, rounding to tolerate float32 imprecision."""
+        return self.joint_dict[round(float(joint), 4)]
+
     def generate_trajs(self, samples):
         """
         For every joint angle, enumerate all shortest-path trajectories for each
@@ -79,7 +83,7 @@ class Gridrobot(Gridworld):
             plt.scatter(path[-2], path[-1], color="orange", marker="x", s=300)
             traj_x = path[0::2]
             traj_y = path[1::2]
-            plt.plot(traj_x, traj_y, c=self.joint_dict[joint], linewidth=3,
+            plt.plot(traj_x, traj_y, c=self._joint_color(joint), linewidth=3,
                      alpha=max(1 / max_display, 0.05))
 
         plt.grid(alpha=0.3)
@@ -104,7 +108,7 @@ class Gridrobot(Gridworld):
         plt.scatter(path[-2], path[-1], color="orange", marker="x", s=300)
         traj_x = path[0::2]
         traj_y = path[1::2]
-        plt.plot(traj_x, traj_y, c=self.joint_dict[joint], linewidth=3)
+        plt.plot(traj_x, traj_y, c=self._joint_color(joint), linewidth=3)
 
         plt.grid(alpha=0.3)
         if im_path is not None:
