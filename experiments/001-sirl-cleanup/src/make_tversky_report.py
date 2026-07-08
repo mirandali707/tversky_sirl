@@ -8,7 +8,14 @@ Usage:
     python make_tversky_report.py \
         --config ../configs/tversky_sirl.yaml \
         --model ../results/tversky_sirl_gridrobot/tversky_sirl_dim10_fbank4_seed0.pth \
-        [--out reports/] [--seed 0]
+        [--out reports/] [--seed 0] [--layers sim proj]
+
+If the config/model path looks like a `tversky_2` run (regex: "tversky" ... "_2",
+so `tversky_2` and `tversky_sirl_2` both match), TWO reports are produced:
+    <out>/<model_stem>/proj/report.md   — encoder[0] Tversky projection layer
+    <out>/<model_stem>/sim/report.md    — final TverskySimilarity head
+Otherwise a single report at <out>/<model_stem>/report.md (sim layer), as before.
+Override detection with --layers.
 
 Each report section is its own helper function with signature
     section_fn(ctx: ReportContext) -> list[str]   # returns markdown lines
@@ -17,6 +24,7 @@ Add new evals by writing a new section_fn and appending it to SECTIONS.
 
 import argparse
 import random
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -64,6 +72,55 @@ def compute_salience(x, feature_bank):
     """
     feature_measures = x @ feature_bank.T  # (N, F)
     return F.relu(feature_measures).sum(-1)
+
+
+# -----------------------------------------------------------------------------
+# tversky layers: which feature bank / instance vectors / similarity to analyze
+# -----------------------------------------------------------------------------
+
+# NOTE: notebook paths are `tversky_sirl_2.yaml` etc., which don't literally
+# contain "tversky_2" — so match "tversky" followed later by "_2".
+TVERSKY_2_PATTERN = re.compile(r"tversky\w*_2")
+
+LAYER_DESCRIPTIONS = {
+    "sim": "final `TverskySimilarity` head: feature bank in *embedding* space; "
+           "instances are mean-centered model embeddings.",
+    "proj": "encoder[0] Tversky projection layer: feature bank in *input* space; "
+            "instances are mean-centered raw trajectories.",
+}
+
+
+def detect_layers(config_path: str, model_path: str) -> list:
+    """tversky_2 models have two analyzable feature banks; plain tversky has one."""
+    if TVERSKY_2_PATTERN.search(str(config_path)) or TVERSKY_2_PATTERN.search(str(model_path)):
+        return ["proj", "sim"]
+    return ["sim"]
+
+
+def compute_layer_quantities(model, all_trajs: np.ndarray, layer: str):
+    """
+    Return (feature_bank, instance_vectors, all_sim) for a tversky layer.
+
+    "sim"  — from tversky_features / tversky_2_sim_features notebooks:
+             bank = model.tversky_sim.feature_bank; instances = centered
+             model embeddings; sim = model.tversky_sim(x, x).
+    "proj" — from tversky_2_proj_features notebook:
+             bank = model.encoder[0].feature_bank; instances = centered
+             *raw* trajectories; sim = model.encoder[0].similarity(x, x).
+    """
+    trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
+    if layer == "sim":
+        feature_bank = model.tversky_sim.feature_bank.weight.detach()
+        embeds = model(trajs_t)
+        instances = (embeds - embeds.mean(0)).detach()
+        all_sim = model.tversky_sim(instances, instances).detach()
+    elif layer == "proj":
+        feature_bank = model.encoder[0].feature_bank.weight.detach()
+        instances = (trajs_t - trajs_t.mean(0)).detach()
+        all_sim = model.encoder[0].similarity(instances, instances).detach()
+    else:
+        raise ValueError(f"unknown layer {layer!r}; expected 'sim' or 'proj'")
+    return feature_bank, instances, all_sim
 
 
 def retrieve_semantic_expression(
@@ -133,10 +190,11 @@ class ReportContext:
     config: dict
     model: object
     env: object
+    layer: str                     # "sim" or "proj"
     all_trajs: np.ndarray          # (N, T)
     all_feats: np.ndarray          # (N, 2)
     feature_bank: torch.Tensor     # (F, D)
-    centered_embeds: torch.Tensor  # (N, D)
+    instance_vectors: torch.Tensor  # (N, D) centered embeds (sim) or centered raw trajs (proj)
     centered_salience: torch.Tensor  # (N,)
     all_sim: torch.Tensor          # (N, N) pairwise Tversky similarity
     fig_dir: Path                  # where to save trajectory figures
@@ -145,20 +203,21 @@ class ReportContext:
     semantic_results: dict = field(default_factory=dict)
 
 
-def build_context(config_path: str, model_path: str, out_dir: Path) -> ReportContext:
+def load_model_and_data(config_path: str, model_path: str):
+    """Load once; contexts are built per layer from these."""
     config = parse_config(config_path)
     model = load_model_only(config, model_path)
-    feature_bank = model.tversky_sim.feature_bank.weight.detach()
-
     data = load_data(config)
+    return config, model, data
+
+
+def build_context(config, model, data, layer: str, out_dir: Path) -> ReportContext:
     all_trajs = data["trajs"]
     all_feats = data["features"]
 
-    all_embeds = model(torch.as_tensor(all_trajs, dtype=torch.float32))
-    # raw saliences are all 0 (features all positive) -> center embeddings
-    centered_embeds = (all_embeds - all_embeds.mean(0)).detach()
-    centered_salience = compute_salience(centered_embeds, feature_bank).detach()
-    all_sim = model.tversky_sim(centered_embeds, centered_embeds).detach()
+    # raw saliences are all >= 0 / all 0 -> instances are mean-centered
+    feature_bank, instance_vectors, all_sim = compute_layer_quantities(model, all_trajs, layer)
+    centered_salience = compute_salience(instance_vectors, feature_bank).detach()
 
     fig_dir = out_dir / "figs"
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -167,10 +226,11 @@ def build_context(config_path: str, model_path: str, out_dir: Path) -> ReportCon
         config=config,
         model=model,
         env=build_env(),
+        layer=layer,
         all_trajs=all_trajs,
         all_feats=all_feats,
         feature_bank=feature_bank,
-        centered_embeds=centered_embeds,
+        instance_vectors=instance_vectors,
         centered_salience=centered_salience,
         all_sim=all_sim,
         fig_dir=fig_dir,
@@ -261,7 +321,7 @@ def section_semantic_differences(ctx: ReportContext,
         for direction, (a, b) in [("max - min", (max_idx, min_idx)),
                                   ("min - max", (min_idx, max_idx))]:
             res = retrieve_semantic_expression(
-                instance_vectors=ctx.centered_embeds,
+                instance_vectors=ctx.instance_vectors,
                 feature_bank=ctx.feature_bank,
                 expression=f"s({a})-s({b})",
                 top_feature_count=top_feature_count,
@@ -338,30 +398,42 @@ def main():
     parser.add_argument("--model", required=True, help="path to model checkpoint (.pth)")
     parser.add_argument("--out", default="reports", help="output directory")
     parser.add_argument("--seed", type=int, default=None, help="random seed for query sampling")
+    parser.add_argument("--layers", nargs="+", choices=["sim", "proj"], default=None,
+                        help="which tversky layers to report on; default: auto-detect "
+                             "(tversky_2 paths -> proj + sim, otherwise sim only)")
     args = parser.parse_args()
 
-    if args.seed is not None:
-        random.seed(args.seed)
-        np.random.seed(args.seed)
-        torch.manual_seed(args.seed)
+    layers = args.layers or detect_layers(args.config, args.model)
+    config, model, data = load_model_and_data(args.config, args.model)
+    base_dir = Path(args.out) / Path(args.model).stem
 
-    out_dir = Path(args.out) / Path(args.model).stem
-    out_dir.mkdir(parents=True, exist_ok=True)
+    for layer in layers:
+        # re-seed per layer so each report is reproducible independently
+        if args.seed is not None:
+            random.seed(args.seed)
+            np.random.seed(args.seed)
+            torch.manual_seed(args.seed)
 
-    ctx = build_context(args.config, args.model, out_dir)
+        # single layer: keep old layout (<out>/<stem>/report.md);
+        # multiple layers: one subdir per layer
+        out_dir = base_dir / layer if len(layers) > 1 else base_dir
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    lines = [f"# Tversky feature report: `{Path(args.model).name}`", "",
-             f"config: `{args.config}`  ",
-             f"trajectories: {ctx.all_trajs.shape}, features: {ctx.all_feats.shape}, "
-             f"feature bank: {tuple(ctx.feature_bank.shape)}", ""]
-    for section_fn in SECTIONS:
-        print(f"running {section_fn.__name__}...")
-        lines += section_fn(ctx)
-        lines.append("")
+        ctx = build_context(config, model, data, layer, out_dir)
 
-    report_path = out_dir / "report.md"
-    report_path.write_text("\n".join(lines))
-    print(f"wrote {report_path}")
+        lines = [f"# Tversky feature report: `{Path(args.model).name}` — layer: `{layer}`", "",
+                 f"{LAYER_DESCRIPTIONS[layer]}", "",
+                 f"config: `{args.config}`  ",
+                 f"trajectories: {ctx.all_trajs.shape}, features: {ctx.all_feats.shape}, "
+                 f"feature bank: {tuple(ctx.feature_bank.shape)}", ""]
+        for section_fn in SECTIONS:
+            print(f"[{layer}] running {section_fn.__name__}...")
+            lines += section_fn(ctx)
+            lines.append("")
+
+        report_path = out_dir / "report.md"
+        report_path.write_text("\n".join(lines))
+        print(f"wrote {report_path}")
 
 
 if __name__ == "__main__":

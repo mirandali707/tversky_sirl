@@ -1,4 +1,6 @@
-# Tversky feature report: `tversky_sirl_dim10_fbank4_seed0.pth`
+# Tversky feature report: `tversky_sirl_dim10_fbank4_seed0.pth` — layer: `sim`
+
+final `TverskySimilarity` head: feature bank in *embedding* space; instances are mean-centered model embeddings.
 
 config: `../configs/tversky_sirl.yaml`  
 trajectories: (1960, 19), features: (1960, 2), feature bank: (4, 10)
