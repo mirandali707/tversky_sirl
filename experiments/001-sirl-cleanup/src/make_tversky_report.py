@@ -191,10 +191,7 @@ def save_traj_fig(ctx: ReportContext, traj_idx: int, tag: str) -> str:
     """
     fname = f"{tag}_traj{traj_idx}.png"
     fpath = ctx.fig_dir / fname
-    plt.figure()
-    ctx.env.visualize_one_traj(ctx.all_trajs[traj_idx])
-    plt.savefig(fpath, bbox_inches="tight", dpi=120)
-    plt.close("all")
+    ctx.env.visualize_one_traj(ctx.all_trajs[traj_idx], im_path=fpath)
     return f"![traj {traj_idx}]({ctx.fig_relpath}/{fname})"
 
 
