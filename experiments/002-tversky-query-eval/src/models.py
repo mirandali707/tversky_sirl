@@ -3,6 +3,7 @@
 # from tversky_sirl import train_tversky_sirl, load_tversky_sirl
 # from tversky_sirl_2 import train_tversky_sirl_2, load_tversky_sirl_2
 from tversky_proj import train_tversky_proj, load_tversky_proj
+from tversky_vae import train_tversky_vae, load_tversky_vae
 import time
 
 
@@ -13,6 +14,8 @@ def load_model(train_config, ckpt_path):
     model_params = train_config["model"]
     if model_params["name"] == "tversky_proj":
         model = load_tversky_proj(ckpt_path)
+    if model_params["name"] == "tversky_vae":
+        model = load_tversky_vae(ckpt_path)
     return model
 
 
@@ -32,6 +35,12 @@ def train_model(config, data, results_dir, seed):
         model, history = train_tversky_proj(config, anchors, positives, negatives)
         unix_timestamp = int(time.time())
         ckpt_path = str(results_dir / f"tversky_proj_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+    if model_params["name"] == "tversky_vae":
+        # VAE is unsupervised: train on the raw (unlabelled) trajectories
+        model, history = train_tversky_vae(config, data["trajs"])
+        unix_timestamp = int(time.time())
+        ckpt_path = str(results_dir / f"tversky_vae_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
     return model, ckpt_path
 

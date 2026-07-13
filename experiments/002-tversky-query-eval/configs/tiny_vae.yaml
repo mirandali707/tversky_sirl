@@ -1,11 +1,11 @@
-experiment_name: tiny_tversky_proj_gridrobot
+experiment_name: tiny_tversky_vae
 seeds: [0]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
 model:
     load_ckpt: False
-    name: tversky_proj
+    name: tversky_vae
     latent_dim: [6]
     num_epochs: 3000
     lr: 0.004

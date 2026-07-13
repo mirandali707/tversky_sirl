@@ -15,7 +15,7 @@ model:
     use_symmetric_loss: True
     l2_weight: 0.0
     fbank_size: [2, 4, 8, 16, 32, 64, 128] 
-    class_count: [2, 4, 8, 16, 32, 64, 128] 
+    # class_count: [2, 4, 8, 16, 32, 64, 128] # latent_dim is class_count (num prototypes) - the embedding is the "similarity to each prototype"
     similarity_model: contrast
     intersection_reduction: product
     difference_reduction: substractmatch
