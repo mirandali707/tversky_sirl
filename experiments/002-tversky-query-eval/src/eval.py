@@ -58,7 +58,6 @@ def eval_queries(config, data, model):
 
     # knobs (overridable from the config's eval entry / top level)
     q_cfg            = config.get("query", {})
-    extreme_k        = q_cfg.get("extreme_k", 5)        # how many trajs count as "the max/min set" per feature
     top_feature_count = q_cfg.get("top_feature_count", 4)
     top_result_count = q_cfg.get("top_result_count", 5)
     alphas           = q_cfg.get("alphas", [0.05, 0.01, 0.001])
@@ -84,9 +83,9 @@ def eval_queries(config, data, model):
     results = {}
     for f_ix, f_name in enumerate(FEATURE_NAMES):
         vals = all_feats[:, f_ix]
-        order = np.argsort(vals)               # ascending
-        min_set = [int(i) for i in order[:extreme_k]]        # smallest feature values
-        max_set = [int(i) for i in order[-extreme_k:]]       # largest feature values
+        # every traj tied at the absolute max / min feature value (e.g. laptop == 1 / 0)
+        max_set = [int(i) for i in np.flatnonzero(vals == vals.max())]
+        min_set = [int(i) for i in np.flatnonzero(vals == vals.min())]
         pairs = list(itertools.product(max_set, min_set))    # all (max_traj, min_traj) pairs
 
         # counters aggregated over all pairs for this feature
@@ -130,7 +129,8 @@ def eval_queries(config, data, model):
 
         results[f_name] = {
             "n_pairs": len(pairs),
-            "extreme_k": extreme_k,
+            "n_max_trajs": len(max_set),
+            "n_min_trajs": len(min_set),
             "n_nonempty_hist": n_nonempty_hist,       # {0,1,2 -> count of pairs}
             "n_both_nonempty": n_both_nonempty,
             "n_ttest_run": n_ttest_run,
