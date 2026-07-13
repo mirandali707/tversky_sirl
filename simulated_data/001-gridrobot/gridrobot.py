@@ -28,7 +28,11 @@ class Gridrobot(Gridworld):
 
     def _joint_color(self, joint):
         """look up joint color, rounding to tolerate float32 imprecision."""
-        return self.joint_dict[round(float(joint), 4)]
+        try:
+            return self.joint_dict[round(float(joint), 4)]
+        except:
+            print(f"unknown joint angle {joint}")
+            return "black"
 
     def generate_trajs(self, samples):
         """
