@@ -33,7 +33,8 @@
         },
         "eval": [
             {
-                "method": "query"
+                "method": "query",
+                "max_pairs": 1000
             }
         ]
     }

@@ -36,13 +36,13 @@ def eval_model(config, data, model):
             }
             all_eval = all_eval | tpa_dict
         if method == "query":
-            query = eval_queries(config, data, model)
+            query = eval_queries(config, data, model, entry)
             print(f"query: {query}")
             all_eval = all_eval | {"query": query}
     return all_eval
 
 
-def eval_queries(config, data, model):
+def eval_queries(config, data, model, eval_params=None):
     """
     * all possible pairs for min / max joint angle, min / max laptop, and see how often non-empty queries with significant t-test of means happens
 	* get {set of trajs with max joint angle feature value} {set of trajs with min joint angle feature value}
@@ -56,11 +56,13 @@ def eval_queries(config, data, model):
     all_trajs = data["trajs"]      # (N, 19)
     all_feats = data["features"]   # (N, 2)
 
-    # knobs (overridable from the config's eval entry / top level)
-    q_cfg            = config.get("query", {})
+    # knobs — read from this method's eval_params entry (e.g. {method: query, max_pairs: 1000})
+    q_cfg            = eval_params or {}
     top_feature_count = q_cfg.get("top_feature_count", 4)
     top_result_count = q_cfg.get("top_result_count", 5)
     alphas           = q_cfg.get("alphas", [0.05, 0.01, 0.001])
+    max_pairs        = q_cfg.get("max_pairs", None)   # if set, sample this many (max, min) pairs per feature
+    rng              = np.random.default_rng(config.get("seed", 0))
 
     # feature bank lives in the encoder[0] Tversky projection ("proj" layer), so
     # instance vectors are the centered *raw* trajectories in that same space.
@@ -87,6 +89,9 @@ def eval_queries(config, data, model):
         max_set = [int(i) for i in np.flatnonzero(vals == vals.max())]
         min_set = [int(i) for i in np.flatnonzero(vals == vals.min())]
         pairs = list(itertools.product(max_set, min_set))    # all (max_traj, min_traj) pairs
+        if max_pairs is not None and len(pairs) > max_pairs:
+            sample_ix = rng.choice(len(pairs), size=max_pairs, replace=False)
+            pairs = [pairs[i] for i in sample_ix]
 
         # counters aggregated over all pairs for this feature
         n_nonempty_hist = {0: 0, 1: 0, 2: 0}   # how many of the 2 queries per pair were non-empty
