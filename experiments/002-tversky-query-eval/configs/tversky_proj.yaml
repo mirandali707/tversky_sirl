@@ -11,7 +11,6 @@ model:
     lr: 0.004
     lr_decay: 0.99999
     margin: 0.1
-    hidden_dim: 128
     log_interval: 100
     use_symmetric_loss: True
     l2_weight: 0.0

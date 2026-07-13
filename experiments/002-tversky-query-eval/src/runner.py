@@ -4,7 +4,7 @@ import itertools
 import pandas as pd
 from pathlib import Path
 from utils import *
-from models import get_model
+from models import train_model
 from eval import eval_model
 
 
@@ -68,7 +68,7 @@ def main(config):
             } | param_permutation # add this permutation of listed params to the row
             set_all_seeds(seed)
 
-            model, ckpt_path = get_model(curr_config, data, results_dir, seed)
+            model, ckpt_path = train_model(curr_config, data, results_dir, seed)
             row["ckpt_path"] = ckpt_path
 
             results = eval_model(curr_config, data, model)
