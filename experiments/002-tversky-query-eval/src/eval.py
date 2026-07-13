@@ -1,7 +1,14 @@
+import itertools
+
 import numpy as np
 import torch
 import torch.nn as nn
+from scipy import stats
 from sklearn.linear_model import LinearRegression
+from tversky_utils import retrieve_semantic_expression
+
+# raw feature columns in data["features"], in order (matches make_tversky_report.py)
+FEATURE_NAMES = ["laptop (computer_dist)", "upright (joint_up)"]
 
 
 def eval_model(config, data, model):
@@ -28,7 +35,113 @@ def eval_model(config, data, model):
                 "tpa_std": np.std(tpa)
             }
             all_eval = all_eval | tpa_dict
+        if method == "query":
+            query = eval_queries(config, data, model)
+            print(f"query: {query}")
+            all_eval = all_eval | {"query": query}
     return all_eval
+
+
+def eval_queries(config, data, model):
+    """
+    * all possible pairs for min / max joint angle, min / max laptop, and see how often non-empty queries with significant t-test of means happens
+	* get {set of trajs with max joint angle feature value} {set of trajs with min joint angle feature value}
+	* make all pairs dataset
+	* for each pair, make 2x queries from trajectories (min - max, max - min) keep track of:
+		* num non-empty queries (0, 1, or 2)
+		* if 2: compare two samples via t-test of means
+			* report one-sided t-test of means (max - min should be > min - max) stats
+			* flags or value for significant at 0.05, 0.01, .001
+    """
+    all_trajs = data["trajs"]      # (N, 19)
+    all_feats = data["features"]   # (N, 2)
+
+    # knobs (overridable from the config's eval entry / top level)
+    q_cfg            = config.get("query", {})
+    extreme_k        = q_cfg.get("extreme_k", 5)        # how many trajs count as "the max/min set" per feature
+    top_feature_count = q_cfg.get("top_feature_count", 4)
+    top_result_count = q_cfg.get("top_result_count", 5)
+    alphas           = q_cfg.get("alphas", [0.05, 0.01, 0.001])
+
+    # feature bank lives in the encoder[0] Tversky projection ("proj" layer), so
+    # instance vectors are the centered *raw* trajectories in that same space.
+    # (see compute_layer_quantities in make_tversky_report.py)
+    # feature_bank = model.tversky_sim.feature_bank.weight.detach()  # "sim" layer alternative
+    feature_bank = model.encoder[0].feature_bank.weight.detach()  # (F, D)
+    trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
+    instance_vectors = (trajs_t - trajs_t.mean(0)).detach()       # (N, D)
+
+    def run_query(a_idx, b_idx):
+        """s(a) - s(b): retrieve instances salient for a's features but not b's."""
+        return retrieve_semantic_expression(
+            instance_vectors=instance_vectors,
+            feature_bank=feature_bank,
+            expression=f"s({a_idx})-s({b_idx})",
+            top_feature_count=top_feature_count,
+            top_result_count=top_result_count,
+        )
+
+    results = {}
+    for f_ix, f_name in enumerate(FEATURE_NAMES):
+        vals = all_feats[:, f_ix]
+        order = np.argsort(vals)               # ascending
+        min_set = [int(i) for i in order[:extreme_k]]        # smallest feature values
+        max_set = [int(i) for i in order[-extreme_k:]]       # largest feature values
+        pairs = list(itertools.product(max_set, min_set))    # all (max_traj, min_traj) pairs
+
+        # counters aggregated over all pairs for this feature
+        n_nonempty_hist = {0: 0, 1: 0, 2: 0}   # how many of the 2 queries per pair were non-empty
+        n_both_nonempty = 0                    # pairs where both queries were non-empty (t-test eligible)
+        n_ttest_run     = 0                    # pairs where the one-sided t-test actually ran
+        n_sig           = {a: 0 for a in alphas}
+        pair_records    = []
+
+        for m, n in pairs:
+            # 2 queries: max-min (expect higher feature values) and min-max
+            res_maxmin = run_query(m, n)   # s(max) - s(min)
+            res_minmax = run_query(n, m)   # s(min) - s(max)
+            maxmin_ok = res_maxmin["feature_count"] > 0
+            minmax_ok = res_minmax["feature_count"] > 0
+            n_nonempty = int(maxmin_ok) + int(minmax_ok)
+            n_nonempty_hist[n_nonempty] += 1
+
+            rec = {"pair": (m, n), "n_nonempty": n_nonempty}
+
+            if n_nonempty == 2:
+                n_both_nonempty += 1
+                # raw feature values of the instances each query retrieved
+                a = [all_feats[inst["item_ix"], f_ix] for inst in res_maxmin["top_instances"]]
+                b = [all_feats[inst["item_ix"], f_ix] for inst in res_minmax["top_instances"]]
+                # one-sided: max-min set should have the LARGER mean feature value
+                if len(a) >= 2 and len(b) >= 2:
+                    t = stats.ttest_ind(a, b, alternative="greater")
+                    n_ttest_run += 1
+                    rec |= {
+                        "mean_maxmin": float(np.mean(a)),
+                        "mean_minmax": float(np.mean(b)),
+                        "t": float(t.statistic),
+                        "p": float(t.pvalue),
+                        "sig": {a_: bool(t.pvalue < a_) for a_ in alphas},
+                    }
+                    for a_ in alphas:
+                        if t.pvalue < a_:
+                            n_sig[a_] += 1
+            pair_records.append(rec)
+
+        results[f_name] = {
+            "n_pairs": len(pairs),
+            "extreme_k": extreme_k,
+            "n_nonempty_hist": n_nonempty_hist,       # {0,1,2 -> count of pairs}
+            "n_both_nonempty": n_both_nonempty,
+            "n_ttest_run": n_ttest_run,
+            "n_significant": n_sig,                    # {alpha -> count of significant pairs}
+            "frac_significant": {a: (n_sig[a] / n_ttest_run if n_ttest_run else 0.0)
+                                 for a in alphas},
+            "pairs": pair_records,
+        }
+
+    return results
+
 
 
 def eval_fpe(config, data, model):
