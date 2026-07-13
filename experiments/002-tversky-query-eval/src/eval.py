@@ -1,4 +1,5 @@
 import itertools
+import warnings
 
 import numpy as np
 import torch
@@ -37,7 +38,12 @@ def eval_model(config, data, model):
             all_eval = all_eval | tpa_dict
         if method == "query":
             query = eval_queries(config, data, model, entry)
-            print(f"query: {query}")
+            # print(f"query: {query}")
+            print(f"QUERY RESULTS")
+            for f_name in FEATURE_NAMES:
+                print(f"feature {f_name}")
+                f_query = query[f_name]
+                print(f"n_pairs {f_query["n_pairs"]}, n_ttest_run {f_query["n_ttest_run"]}, n_significant {f_query["n_significant"]}")
             all_eval = all_eval | {"query": query}
     return all_eval
 
@@ -116,9 +122,16 @@ def eval_queries(config, data, model, eval_params=None):
                 # raw feature values of the instances each query retrieved
                 a = [all_feats[inst["item_ix"], f_ix] for inst in res_maxmin["top_instances"]]
                 b = [all_feats[inst["item_ix"], f_ix] for inst in res_minmax["top_instances"]]
-                # one-sided: max-min set should have the LARGER mean feature value
-                if len(a) >= 2 and len(b) >= 2:
-                    t = stats.ttest_ind(a, b, alternative="greater")
+                # one-sided: max-min set should have the LARGER mean feature value.
+                # skip pairs where both retrieved sets are constant: the t-test is
+                # undefined (nan) and scipy warns on catastrophic cancellation.
+                both_constant = np.std(a) == 0 and np.std(b) == 0
+                if len(a) >= 2 and len(b) >= 2 and not both_constant:
+                    # near-constant (but not exactly equal) samples make scipy warn
+                    # about precision loss; the resulting t is still finite/usable.
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", RuntimeWarning)
+                        t = stats.ttest_ind(a, b, alternative="greater")
                     n_ttest_run += 1
                     rec |= {
                         "mean_maxmin": float(np.mean(a)),
