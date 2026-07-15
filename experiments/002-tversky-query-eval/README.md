@@ -30,6 +30,9 @@ measure
 ![](figs/tversky_vae_fbank_size.png)
 ![](figs/tversky_vae_latent_dim.png)
 
+*general observation: seems the laptop feature is easier for tversky than the upright feature*
+not clear why but could try rescaling or encoding it as an offset on the other coordinates instead of just the value of one dim
+
 **how do the different hyperparams affect how query-able the tversky projection is?**
 `tversky_proj`
 * latent dim doesn't seem to make a difference
