@@ -114,7 +114,7 @@ def train_tversky_sirl(
     n_triplets = A.shape[0]
     print(f"input dim: {input_dim}")
 
-    model = TverskySIRL(
+    model = TverskySim(
         input_dim=input_dim, hidden_dim=hidden_dim, latent_dim=latent_dim,
         fbank_size=fbank_size, similarity_model=similarity_model,
         intersection_reduction=intersection_reduction,
@@ -164,7 +164,7 @@ def train_tversky_sirl(
 
 def load_tversky_sirl(path, device=None):
     ckpt = torch.load(path, map_location=device, weights_only=False)
-    model = TverskySIRL(**ckpt['hparams'])
+    model = TverskySim(**ckpt['hparams'])
     model.load_state_dict(ckpt['state_dict'])
     model.eval()
     if device:

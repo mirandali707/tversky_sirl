@@ -37,13 +37,15 @@ def eval_model(config, data, model):
             }
             all_eval = all_eval | tpa_dict
         if method == "query":
-            query = eval_queries(config, data, model, entry)
-            # print(f"query: {query}")
-            print(f"QUERY RESULTS")
-            for f_name in FEATURE_NAMES:
-                print(f"feature {f_name}")
-                f_query = query[f_name]
-                print(f"n_pairs {f_query["n_pairs"]}, n_ttest_run {f_query["n_ttest_run"]}, n_significant {f_query["n_significant"]}")
+            query = eval_queries(config, data, model, entry)   # {bank: {feature: ...}}
+            print("QUERY RESULTS")
+            for bank_name, bank_query in query.items():        # "proj" and/or "sim"
+                for f_name in FEATURE_NAMES:
+                    f_query = bank_query[f_name]
+                    print(f"[{bank_name}] {f_name}: n_pairs {f_query['n_pairs']}, "
+                          f"n_ttest_run {f_query['n_ttest_run']}, "
+                          f"n_significant {f_query['n_significant']}")
+                all_eval[f"query_{bank_name}"] = bank_query
             all_eval = all_eval | {"query": query}
     return all_eval
 
@@ -145,33 +147,6 @@ def eval_tpa(config, data, model):
     return tpas
 
 
-# Same module-level imports as before are assumed:
-#   itertools, warnings, numpy as np, torch, scipy.stats as stats,
-#   retrieve_semantic_expression, FEATURE_NAMES
-
-
-def _capture_layer_input(model, layer, trajs_t):
-    """Run a forward pass and grab the tensor actually fed into `layer`.
-
-    Used for Tversky layers that sit *downstream* of an encoder (e.g. the
-    "sim" layer in tversky_sirl_2): their instances live in the layer's input
-    space, not the raw trajectory space. A forward pre-hook captures that input
-    exactly, so any upstream ops (proj, transform_input, etc.) are accounted for.
-    """
-    captured = {}
-
-    def pre_hook(_mod, inp):
-        captured["x"] = inp[0].detach()
-
-    handle = layer.register_forward_pre_hook(pre_hook)
-    try:
-        with torch.no_grad():
-            model(trajs_t)  # <-- adjust if your model.forward needs a different call/signature
-    finally:
-        handle.remove()
-    return captured["x"]
-
-
 def eval_queries(config, data, model, eval_params=None, train_config=None, save_pairs=False):
     """
     * all possible pairs for min / max joint angle, min / max laptop, and see how often non-empty queries with significant t-test of means happens
@@ -219,22 +194,31 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
         )
 
     def bank_feature_and_instances(bank_label):
-        """(feature_bank (F, D), instance_vectors (N, D)) for one Tversky layer."""
+        """(feature_bank (F, D), instance_vectors (N, D)) for one Tversky layer.
+
+        Mirrors compute_layer_quantities in make_tversky_report.py:
+          proj — bank = encoder[0].feature_bank; instances = centered *raw* trajectories.
+          sim  — bank = tversky_sim.feature_bank; instances = centered model embeddings
+                 (model(trajs) returns embeddings; the sim layer is applied separately,
+                 which is why it never fires during a forward pass).
+        """
         if bank_label == "proj":
-            # proj is encoder[0], the first layer -> instances are the centered
-            # raw trajectories in that same space (see compute_layer_quantities
-            # in make_tversky_report.py).
             fb = model.encoder[0].feature_bank.weight.detach()      # (F, D)
             iv = (trajs_t - trajs_t.mean(0)).detach()               # (N, D)
-            return fb, iv
-        if bank_label == "sim":
-            # sim can sit downstream of proj, so its instances live in the
-            # layer's *input* space. Capture the actual input to tversky_sim.
+        elif bank_label == "sim":
             fb = model.tversky_sim.feature_bank.weight.detach()     # (F, D)
-            iv = _capture_layer_input(model, model.tversky_sim, trajs_t)
-            iv = (iv - iv.mean(0)).detach()                         # (N, D)
-            return fb, iv
-        raise ValueError(f"unknown bank label {bank_label!r}")
+            with torch.no_grad():
+                embeds = model(trajs_t)                             # model embeddings
+            iv = (embeds - embeds.mean(0)).detach()                 # (N, D)
+        else:
+            raise ValueError(f"unknown bank label {bank_label!r}")
+
+        if iv.shape[1] != fb.shape[1]:
+            raise ValueError(
+                f"'{bank_label}' bank: instance vectors {tuple(iv.shape)} and feature "
+                f"bank {tuple(fb.shape)} don't share a dim."
+            )
+        return fb, iv
 
     def eval_one_bank(feature_bank, instance_vectors):
         def run_query(a_idx, b_idx):
