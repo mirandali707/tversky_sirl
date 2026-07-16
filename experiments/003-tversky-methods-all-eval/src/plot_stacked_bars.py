@@ -6,7 +6,8 @@ Each bar stacks (bottom -> top):
   then n_nonempty_hist[2] (== what the t-test ran on) split by NESTED significance
   into incremental bands: both/n.s. | p<0.05 | p<0.01 | p<0.001  (sum == hist[2])
 Counts summed across seeds (and any other non-x dimension).
-One figure per sweep column present among X_CANDIDATES.
+One figure per sweep column present among X_CANDIDATES; within a figure,
+one subplot row per Tversky bank present (query_proj / query_sim), one col per feature.
 """
 import ast, sys
 import pandas as pd
@@ -22,6 +23,7 @@ SEGMENTS = [                       # (legend label, color); bottom -> top
 ]
 LABELS = [s[0] for s in SEGMENTS]
 X_CANDIDATES = ["latent_dim", "fbank_size", "decoder_hidden"]  # any present -> its own figure
+BANK_ORDER   = ["proj", "sim"]     # query_proj / query_sim -> subplot rows, in this order
 
 def _row_segments(fd):
     h, s = fd["n_nonempty_hist"], fd["n_significant"]
@@ -30,31 +32,48 @@ def _row_segments(fd):
     return [h0, h1, h2 - s05, s05 - s01, s01 - s001, s001]
 
 def _tidy(df):
-    parsed = df["query"].apply(ast.literal_eval)
-    feats = list(parsed.iloc[0].keys())
+    # each bank now lives in its own column: query_proj / query_sim (either may be absent
+    # or NaN for a given row, since a model only has the banks it exposes).
+    bank_cols = [f"query_{b}" for b in BANK_ORDER if f"query_{b}" in df.columns]
+    if not bank_cols:
+        raise ValueError("no query_* columns found (expected query_proj / query_sim)")
     xcols = [c for c in X_CANDIDATES if c in df.columns]
-    rows = []
-    for q, (_, r) in zip(parsed, df.iterrows()):
-        for f in feats:
-            rows.append({"feature": f, **{c: r[c] for c in xcols},
-                         **dict(zip(LABELS, _row_segments(q[f])))})
+    feats, rows = None, []
+    for col in bank_cols:
+        bank = col[len("query_"):]
+        for _, r in df.iterrows():
+            cell = r[col]
+            if isinstance(cell, float) and pd.isna(cell):   # bank absent for this run
+                continue
+            parsed = ast.literal_eval(cell) if isinstance(cell, str) else cell
+            if feats is None:
+                feats = list(parsed.keys())
+            for f in parsed:
+                rows.append({"bank": bank, "feature": f,
+                             **{c: r[c] for c in xcols},
+                             **dict(zip(LABELS, _row_segments(parsed[f])))})
     return pd.DataFrame(rows), feats, xcols
 
 def _figure(tidy, feats, x_col):
-    fig = make_subplots(rows=1, cols=len(feats), shared_yaxes=True,
-                        subplot_titles=feats, horizontal_spacing=0.07)
-    for ci, f in enumerate(feats, 1):
-        agg = (tidy[tidy.feature == f]
-               .groupby(x_col, as_index=False)[LABELS].sum().sort_values(x_col))
-        x = agg[x_col].astype(str)
-        for label, color in SEGMENTS:
-            fig.add_bar(x=x, y=agg[label], name=label, marker_color=color,
-                        legendgroup=label, showlegend=(ci == 1), row=1, col=ci)
+    banks = [b for b in BANK_ORDER if b in set(tidy["bank"])]
+    fig = make_subplots(rows=len(banks), cols=len(feats), shared_yaxes=True,
+                        column_titles=feats, row_titles=banks,
+                        horizontal_spacing=0.07, vertical_spacing=0.12)
+    first = True                       # legend once, across the whole grid
+    for ri, bank in enumerate(banks, 1):
+        for ci, f in enumerate(feats, 1):
+            sub = tidy[(tidy.bank == bank) & (tidy.feature == f)]
+            agg = sub.groupby(x_col, as_index=False)[LABELS].sum().sort_values(x_col)
+            x = agg[x_col].astype(str)
+            for label, color in SEGMENTS:
+                fig.add_bar(x=x, y=agg[label], name=label, marker_color=color,
+                            legendgroup=label, showlegend=first, row=ri, col=ci)
+            first = False
     fig.update_layout(barmode="stack", template="plotly_white", bargap=0.28,
                       title=f"nonempty + significance by {x_col} (summed over seeds)",
                       legend_title_text="pair category")
     fig.update_xaxes(title_text=x_col, type="category")
-    fig.update_yaxes(title_text="# pairs", row=1, col=1)
+    fig.update_yaxes(title_text="# pairs", col=1)
     return fig
 
 def plot_results(csv_path):

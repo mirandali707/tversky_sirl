@@ -1,4 +1,4 @@
-experiment_name: tversky_sim_gridrobot_fpe_tpa
+experiment_name: tversky_sim_gridrobot
 seeds: [0, 1, 2]
 data:
     dataset_name: gridrobot_1960 
