@@ -20,7 +20,7 @@ def retrieve_semantic_expression(
         feature_values = instance_vectors[item_ix:item_ix+1] @ feature_bank.T  # (1, F)
         feature_ixes = []
         for feature_ix in torch.argsort(feature_values[0], descending=True)[:top_feature_count]:
-            if feature_values[0][feature_ix] > 0:
+            if feature_values[0][feature_ix] > 0: # only select salient features (positive nonzero feature values)
                 feature_ixes.append(int(feature_ix))
             else:
                 break
@@ -53,4 +53,5 @@ def retrieve_semantic_expression(
         "query_item_ixes" : query_item_ixes,
         "feature_count"   : len(semantic_features),
         "top_instances"   : top_instances,
+        "semantic_features": semantic_features # miranda added
     }
