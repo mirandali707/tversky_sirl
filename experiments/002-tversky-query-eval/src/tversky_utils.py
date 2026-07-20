@@ -36,6 +36,29 @@ def retrieve_semantic_expression(
     semantic_f_bank = torch.index_select(
         feature_bank, 0, torch.tensor(sorted(semantic_features))
     )
+
+    top_instances = get_top_instances(instance_vectors, semantic_f_bank, top_result_count)
+    # dot = instance_vectors @ semantic_f_bank.T          # (N, |features|)
+    # p_saliences = F.relu(dot).sum(dim=1)                # (N,)
+    # p_measures  = dot.sum(dim=1)                        # (N,)
+
+    # top_instances = []
+    # for result_ix in torch.argsort(p_measures, descending=True)[:top_result_count]:
+    #     top_instances.append({
+    #         "item_ix"  : result_ix.item(),
+    #         "salience" : p_saliences[result_ix].item(),
+    #         "measure"  : p_measures[result_ix].item(),
+    #     })
+
+    return {
+        "expression"      : expression.strip(),
+        "query_item_ixes" : query_item_ixes,
+        "feature_count"   : len(semantic_features),
+        "top_instances"   : top_instances,
+    }
+
+
+def get_top_instances(instance_vectors, semantic_f_bank, top_result_count):
     dot = instance_vectors @ semantic_f_bank.T          # (N, |features|)
     p_saliences = F.relu(dot).sum(dim=1)                # (N,)
     p_measures  = dot.sum(dim=1)                        # (N,)
@@ -47,10 +70,4 @@ def retrieve_semantic_expression(
             "salience" : p_saliences[result_ix].item(),
             "measure"  : p_measures[result_ix].item(),
         })
-
-    return {
-        "expression"      : expression.strip(),
-        "query_item_ixes" : query_item_ixes,
-        "feature_count"   : len(semantic_features),
-        "top_instances"   : top_instances,
-    }
+    return top_instances
