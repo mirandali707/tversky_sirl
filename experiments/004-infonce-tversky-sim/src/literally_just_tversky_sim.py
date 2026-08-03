@@ -97,6 +97,31 @@ def train_tversky_sim(
 
     return model
 
+@config_overridable
+def random_init_no_training_tversky_sim(
+    config,
+    input_dim=19,
+    fbank_size=4, 
+    similarity_model='contrast',
+    intersection_reduction='product',
+    difference_reduction='ignorematch',
+    normalize=False,
+    num_epochs=10000,
+    batch_size=64,
+    lr=0.004,
+    lr_decay=0.99999,
+    tau=0.1,
+    device='cuda' if torch.cuda.is_available() else 'cpu',
+    log_interval=100,
+):
+    model = LiterallyJustTverskySim(
+        input_dim=input_dim,
+        fbank_size=fbank_size, 
+        similarity_model=similarity_model,
+        intersection_reduction=intersection_reduction,
+        difference_reduction=difference_reduction,
+    ).to(device)
+    return model
 
 def contrastive_step(model, hi, lo, batch_size, tau=0.1):
     # anchors: batch_size positives; partners: also batch_size positives

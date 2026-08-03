@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from literally_just_tversky_sim import train_tversky_sim
+from literally_just_tversky_sim import train_tversky_sim, random_init_no_training_tversky_sim
 from encoders import *
 
 def train_model(config, data, results_dir, seed):
@@ -9,6 +9,15 @@ def train_model(config, data, results_dir, seed):
     from all trajectories and their feature values, we extract only trajectories with max or min laptop distance
     and train just the TverskySimilarity layer with InfoNCE loss on those
     """
+    unix_timestamp = int(time.time())
+
+    if config["experiment_name"] == "random_init_no_training":
+        # TODO this only uses input dim 19, could edit to take different input dims for comparison with e.g. pca, sirl
+        model = random_init_no_training_tversky_sim(config)
+        ckpt_path = str(results_dir / f"random_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+        return model, ckpt_path
+
     hi_trajs, lo_trajs, hi_feats, lo_feats = get_hi_lo_laptop_trajs(data)
     input_dim = hi_trajs.shape[1]
     # transform trajs with encoder, if specified
@@ -28,7 +37,6 @@ def train_model(config, data, results_dir, seed):
         lo_trajs = lo_feats
         input_dim = hi_feats.shape[1]
     model = train_tversky_sim(config, hi_trajs, lo_trajs, input_dim=input_dim)
-    unix_timestamp = int(time.time())
     ckpt_path = str(results_dir / f"tversky_proj_{unix_timestamp}.pth")
     model.save_model(ckpt_path)
     return model, ckpt_path
