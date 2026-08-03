@@ -10,17 +10,15 @@
             "dataset_name": "gridrobot_1960",
             "path": "simulated_data/001-gridrobot/data/gridrobot_1960.npz"
         },
-        "encoder": {
-            "name": "pca",
+        "model": {
+            "encoder": "pca",
             "latent_dim": [
                 2,
                 4,
                 6,
                 8,
                 10
-            ]
-        },
-        "model": {
+            ],
             "load_ckpt": false,
             "name": "literally_just_tversky_sim",
             "num_epochs": 8000,

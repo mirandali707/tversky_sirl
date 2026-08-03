@@ -3,10 +3,9 @@ seeds: [0, 1, 2]
 data:
     dataset_name: gridrobot_1960 
     path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
-encoder: 
-    name: pca
-    latent_dim: [2,4,6,8,10]
 model:
+    encoder: pca
+    latent_dim: [2,4,6,8,10]
     load_ckpt: False
     name: literally_just_tversky_sim
     num_epochs: 8000

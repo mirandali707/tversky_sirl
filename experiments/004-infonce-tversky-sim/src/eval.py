@@ -179,10 +179,9 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
     rng              = np.random.default_rng(config.get("seed", 0))
 
     # transform all trajs according to encoder
-    if config["encoder"]:
-        if config["encoder"]["name"] == "pca":
-            latent_dim = config["encoder"]["latent_dim"]
-            all_trajs, input_dim = pca(all_trajs, latent_dim)
+    if config["model"]["encoder"] == "pca":
+        latent_dim = config["model"]["latent_dim"]
+        all_trajs, input_dim = pca(all_trajs, latent_dim)
 
     trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
 
