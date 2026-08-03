@@ -13,13 +13,20 @@ def train_model(config, data, results_dir, seed):
     input_dim = hi_trajs.shape[1]
     # transform trajs with encoder, if specified
     if config["model"]["encoder"] == "pca":
+        # use PCA embeds as input
         latent_dim = config["model"]["latent_dim"]
         hi_trajs, input_dim = pca(hi_trajs, latent_dim)
         lo_trajs, input_dim = pca(lo_trajs, latent_dim)
     if config["model"]["encoder"] == "sirl":
+        # use SIRL embeds as input
         latent_dim = config["model"]["latent_dim"]
         hi_trajs, input_dim = sirl(hi_trajs, latent_dim)
         lo_trajs, input_dim = sirl(lo_trajs, latent_dim)
+    if config["model"]["encoder"] == "feats":
+        # use ground truth features as input
+        hi_trajs = hi_feats
+        lo_trajs = lo_feats
+        input_dim = hi_feats.shape[1]
     model = train_tversky_sim(config, hi_trajs, lo_trajs, input_dim=input_dim)
     unix_timestamp = int(time.time())
     ckpt_path = str(results_dir / f"tversky_proj_{unix_timestamp}.pth")

@@ -180,12 +180,16 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
 
     # transform all trajs according to encoder
     if config["model"]["encoder"] == "pca":
+        # use PCA embeds as input
         latent_dim = config["model"]["latent_dim"]
         all_trajs, input_dim = pca(all_trajs, latent_dim)
     if config["model"]["encoder"] == "sirl":
+        # use SIRL embeds as input
         latent_dim = config["model"]["latent_dim"]
         all_trajs, input_dim = sirl(all_trajs, latent_dim)
-
+    if config["model"]["encoder"] == "feats":
+        # use ground truth features as input
+        all_trajs = all_feats
     trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
 
     # --- which Tversky feature banks does this model have? ---
