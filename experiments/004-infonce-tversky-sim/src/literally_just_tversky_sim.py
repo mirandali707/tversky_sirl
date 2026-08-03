@@ -26,6 +26,7 @@ class LiterallyJustTverskySim(nn.Module):
             intersection_reduction=intersection_reduction,
             difference_reduction=difference_reduction
         )
+        torch.nn.init.uniform_(self.tversky_sim.feature_bank.weight, -1.0, 1.0)
 
         # store constructor args so save_model/load can reconstruct exactly
         self.hparams = {

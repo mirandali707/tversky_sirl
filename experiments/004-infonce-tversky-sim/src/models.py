@@ -16,6 +16,10 @@ def train_model(config, data, results_dir, seed):
         latent_dim = config["model"]["latent_dim"]
         hi_trajs, input_dim = pca(hi_trajs, latent_dim)
         lo_trajs, input_dim = pca(lo_trajs, latent_dim)
+    if config["model"]["encoder"] == "sirl":
+        latent_dim = config["model"]["latent_dim"]
+        hi_trajs, input_dim = sirl(hi_trajs, latent_dim)
+        lo_trajs, input_dim = sirl(lo_trajs, latent_dim)
     model = train_tversky_sim(config, hi_trajs, lo_trajs, input_dim=input_dim)
     unix_timestamp = int(time.time())
     ckpt_path = str(results_dir / f"tversky_proj_{unix_timestamp}.pth")

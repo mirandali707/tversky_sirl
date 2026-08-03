@@ -1,5 +1,6 @@
 from sklearn.decomposition import PCA
 from sirl import load_sirl
+import torch
 
 def identity(trajs):
     """
@@ -29,7 +30,9 @@ def sirl(trajs, latent_dim):
     take frozen SIRL encoder from expt 003
     load from sirl_ckpts (copied relevant ckpts into this dir)
     """
-    ckpt_path = "../sirl_ckpts/sirl_dim{latent_dim}_seed0.pth"
+    ckpt_path = f"sirl_ckpts/sirl_dim{latent_dim}_seed0.pth"
+    print(f"loading ckpt {ckpt_path}")
     model = load_sirl(ckpt_path)
-    embeds = model(trajs)
+    model.eval()
+    embeds = model(torch.tensor(trajs,dtype=torch.float32)).detach().numpy()
     return embeds, latent_dim
