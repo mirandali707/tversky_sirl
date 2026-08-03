@@ -1,8 +1,10 @@
 {
     "config": {
-        "experiment_name": "tiny_literally_just_tversky_sim_gridrobot_laptop_ONLY",
+        "experiment_name": "pca_ljts",
         "seeds": [
-            0
+            0,
+            1,
+            2
         ],
         "data": {
             "dataset_name": "gridrobot_1960",
@@ -10,20 +12,33 @@
         },
         "encoder": {
             "name": "pca",
-            "latent_dim": 6
+            "latent_dim": [
+                2,
+                4,
+                6,
+                8,
+                10
+            ]
         },
         "model": {
             "load_ckpt": false,
             "name": "literally_just_tversky_sim",
-            "num_epochs": 1000,
+            "num_epochs": 8000,
             "lr": 0.01,
             "lr_decay": 0.99999,
             "tau": 0.1,
             "log_interval": 100,
-            "fbank_size": [
-                4
-            ],
             "batch_size": 16,
+            "fbank_size": [
+                2,
+                4,
+                8,
+                16,
+                32,
+                64,
+                128,
+                256
+            ],
             "similarity_model": "contrast",
             "intersection_reduction": "product",
             "difference_reduction": "substractmatch"

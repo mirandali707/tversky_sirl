@@ -7,6 +7,7 @@ import torch.nn as nn
 from scipy import stats
 from sklearn.linear_model import LinearRegression
 from tversky_utils import retrieve_semantic_expression
+from encoders import *
 
 # raw feature columns in data["features"], in order (matches make_tversky_report.py)
 FEATURE_NAMES = ["laptop (computer_dist)", "upright (joint_up)"]
@@ -176,6 +177,12 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
     alphas           = q_cfg.get("alphas", [0.05, 0.01, 0.001])
     max_pairs        = q_cfg.get("max_pairs", None)   # if set, sample this many (max, min) pairs per feature
     rng              = np.random.default_rng(config.get("seed", 0))
+
+    # transform all trajs according to encoder
+    if config["encoder"]:
+        if config["encoder"]["name"] == "pca":
+            latent_dim = config["encoder"]["latent_dim"]
+            all_trajs, input_dim = pca(all_trajs, latent_dim)
 
     trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
 
