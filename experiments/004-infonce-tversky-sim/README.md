@@ -47,10 +47,12 @@ improves substantially on random init.
 
 
 ## next steps
+* why the heck does SIRL work so well?
+* training TverskySim doesn't improve query-ability over random -> loss function is not properly hill-climbing on query-ability...
 * identify how often no learning occurs (convergence failure)
 * check feature bank consistency across queries - does a consistent set of the tversky feats always encode e.g. laptop distance?
 * we only evaluated how well tversky sim learns one concept which it was explicitly trained on, using all data available.
     * what is the relationship between the amount of training data and the query-ability?
     * how can we teach multiple concepts (e.g. maybe add concept label $c$ to input)?
 * can we use the trained TverskySim layer as a feature extractor, and learn preferences on top of this?
-* here we treat laptop as a binary variable, extracting only max / min laptop trajs.
+* here we treat laptop as a binary variable, extracting only max / min laptop trajs. how would we handle continuous features?
