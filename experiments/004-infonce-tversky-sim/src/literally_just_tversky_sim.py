@@ -140,7 +140,7 @@ def contrastive_step(model, hi, lo, batch_size, tau=0.1):
     return F.cross_entropy(logits, labels)
 
 
-def load_tversky_sirl(path, device=None):
+def load_tversky_sim(path, device=None):
     ckpt = torch.load(path, map_location=device, weights_only=False)
     model = LiterallyJustTverskySim(**ckpt['hparams'])
     model.load_state_dict(ckpt['state_dict'])
