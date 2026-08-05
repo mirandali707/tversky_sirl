@@ -18,13 +18,20 @@ class Gridrobot(Gridworld):
 
     # Discrete joint angles (-90 deg .. +90 deg in 30 deg steps) and the color
     # used to draw trajectories with that angle.
-    joint_dict = {-1.5708: "blue",
-                  -1.0472: "green",
-                  -0.5236: "green",
-                  0.0: "yellow",
-                  0.5236: "orange",
+    joint_dict = {-1.5708: "red",
+                  -1.0472: "orange",
+                  -0.5236: "yellow",
+                  0.0: "green",
+                  0.5236: "yellow",
                   1.0472: "orange",
                   1.5708: "red"}
+    # joint_dict = {-1.5708: "blue",
+    #               -1.0472: "green",
+    #               -0.5236: "green",
+    #               0.0: "yellow",
+    #               0.5236: "orange",
+    #               1.0472: "orange",
+    #               1.5708: "red"}
 
     def _joint_color(self, joint):
         """look up joint color, rounding to tolerate float32 imprecision."""
