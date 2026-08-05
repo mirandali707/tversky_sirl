@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from literally_just_tversky_sim import train_tversky_sim, random_init_no_training_tversky_sim
+from ljts_triplet import train_triplet_tversky_sim
 from encoders import *
 
 def train_model(config, data, results_dir, seed):
@@ -14,6 +15,16 @@ def train_model(config, data, results_dir, seed):
     if config["experiment_name"] == "random_init_no_training":
         # TODO this only uses input dim 19, could edit to take different input dims for comparison with e.g. pca, sirl
         model = random_init_no_training_tversky_sim(config)
+        ckpt_path = str(results_dir / f"random_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+        return model, ckpt_path
+
+    if config["experiment_name"] == "ljts_triplet":
+        anchors = data["anchors"]
+        positives = data["positives"]
+        negatives = data["negatives"]
+
+        model = train_triplet_tversky_sim(config, anchors, positives, negatives)
         ckpt_path = str(results_dir / f"random_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
         return model, ckpt_path
