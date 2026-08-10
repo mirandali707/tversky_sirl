@@ -6,15 +6,14 @@ from sklearn.decomposition import PCA
 import plotly.graph_objects as go
 import sys, os
 sys.path.insert(0, os.path.abspath('../..'))
-from src.utils.input_utils import transform_input
-from src.envs.jacorobot import Jacorobot
-from src.utils.bullet_utils import waypts_to_xyz
-from src.envs.jacorobot import Jacorobot
-from src.models.humans.jacorobot_human import JacorobotHuman
+from input_utils import transform_input
+from jacorobot import Jacorobot
+from bullet_utils import waypts_to_xyz
+from jacorobot_human import JacorobotHuman
 
 from fpe import FPEProbe
 
-DATA_DIR = "../../data/Data Uploads"
+DATA_DIR = "../data"
 
 INPUT_DICT = {'lowdim': False, 'EErot': False, 'noxyz': False, 'norot': True, 'noangles': True}
 def tx(trajs):

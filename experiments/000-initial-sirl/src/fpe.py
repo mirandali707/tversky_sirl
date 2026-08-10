@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import numpy as np
 import torch
 import torch.optim as optim
-from src.models.mlp import MLP
+from mlp import MLP
 
 
 class FPEProbe:
