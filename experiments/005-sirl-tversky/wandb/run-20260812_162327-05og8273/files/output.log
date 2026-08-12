@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky/src/runner.py", line 85, in <module>
-    main(config)
-  File "/Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky/src/runner.py", line 71, in main
-    model, ckpt_path = train_model(curr_config, data, results_dir, seed)
-    ^^^^^^^^^^^^^^^^
-TypeError: cannot unpack non-iterable NoneType object
