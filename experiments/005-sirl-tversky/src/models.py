@@ -20,13 +20,13 @@ def train_model(config, data, results_dir, seed):
         config=config,
     )
 
-    if expt_name == "no_sirl_ts":
+    if expt_name == "no_sirl_ts" or expt_name == "tiny": # TODO make this better
         # TODO this only uses input dim 19, could edit to take different input dims for comparison with e.g. pca, sirl
         anchors = data["anchors"]
         positives = data["positives"]
         negatives = data["negatives"]
 
-        model = train_triplet_tversky_sim(config, anchors, positives, negatives, wandb_run)
+        model = train_triplet_tversky_sim(config, anchors, positives, negatives, wandb_run=run)
         ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
 

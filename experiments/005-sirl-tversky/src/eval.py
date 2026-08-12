@@ -50,6 +50,9 @@ def eval_model(config, data, model):
                           f"n_significant {f_query['n_significant']}")
                 all_eval[f"query_{bank_name}"] = bank_query
             all_eval = all_eval | {"query": query}
+        if method == "tsne":
+            results_dir = tversky_sim_tsne(config, data, model)
+            print(f"figures saved into {results_dir}")
     return all_eval
 
 
@@ -204,6 +207,7 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
         "tversky_sirl":   ["sim"],
         "tversky_sirl_2": ["sim", "proj"],
         "tversky_proj":   ["proj"],
+        "no_sirl_ts": ["sim_only"],
     }.get(model_name)
     if banks_present is None:
         raise ValueError(
@@ -347,7 +351,7 @@ def tversky_sim_tsne(config, data, model):
     all_feats = data["features"]
 
     # TODO add encoder
-    all_sim = model.similarity(all_trajs, all_trajs)
+    all_sim = model.similarity(torch.tensor(all_trajs, dtype=torch.float32), torch.tensor(all_trajs, dtype=torch.float32))
     t_sne = TSNE(
         n_components=2,
         init="random",
@@ -366,3 +370,4 @@ def tversky_sim_tsne(config, data, model):
                         title=f"{expt_name} similarity, colored by {feat}"
                         )
         fig.write_image(results_dir / f"{expt_name}_tsne_feat_{feat}.png")
+    return results_dir

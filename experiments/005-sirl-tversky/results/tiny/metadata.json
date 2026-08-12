@@ -1,0 +1,39 @@
+{
+    "config": {
+        "experiment_name": "tiny",
+        "seeds": [
+            0
+        ],
+        "data": {
+            "dataset_name": "gridrobot_1960",
+            "path": "simulated_data/001-gridrobot/data/gridrobot_1960.npz"
+        },
+        "model": {
+            "load_ckpt": false,
+            "name": "no_sirl_ts",
+            "num_epochs": 8000,
+            "lr": 0.01,
+            "lr_decay": 0.99999,
+            "tau": 0.1,
+            "log_interval": 100,
+            "batch_size": 16,
+            "fbank_size": [
+                16
+            ],
+            "similarity_model": "ratio",
+            "intersection_reduction": "product",
+            "difference_reduction": "substractmatch",
+            "normalize": true,
+            "symmetric": false
+        },
+        "eval": [
+            {
+                "method": "query",
+                "max_pairs": 1000
+            },
+            {
+                "method": "tsne"
+            }
+        ]
+    }
+}

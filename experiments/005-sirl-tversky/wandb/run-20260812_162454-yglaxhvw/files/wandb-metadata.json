@@ -1,0 +1,31 @@
+{
+  "os": "macOS-15.6.1-arm64-arm-64bit",
+  "python": "CPython 3.12.12",
+  "startedAt": "2026-08-12T20:24:54.555753Z",
+  "args": [
+    "--config",
+    "configs/tiny.yaml"
+  ],
+  "program": "/Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky/src/runner.py",
+  "codePath": "experiments/005-sirl-tversky/src/runner.py",
+  "codePathLocal": "src/runner.py",
+  "git": {
+    "commit": "c30c99f2310325531a433e666ead0b17d66535c1"
+  },
+  "email": "m1randa@mit.edu",
+  "root": "/Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky",
+  "host": "Mirandas-MacBook-Air-2.local",
+  "executable": "/Users/miranda/miniconda3/envs/tversky_sirl/bin/python",
+  "cpu_count": 10,
+  "cpu_count_logical": 10,
+  "disk": {
+    "/": {
+      "total": "494384795648",
+      "used": "448412078080"
+    }
+  },
+  "memory": {
+    "total": "17179869184"
+  },
+  "writerId": "7ibf4iqgq16dzjl29ujqxq2m0dcodf5z"
+}

@@ -1,0 +1,75 @@
+_wandb:
+    value:
+        cli_version: 0.28.1
+        e:
+            7ibf4iqgq16dzjl29ujqxq2m0dcodf5z:
+                args:
+                    - --config
+                    - configs/tiny.yaml
+                codePath: experiments/005-sirl-tversky/src/runner.py
+                codePathLocal: src/runner.py
+                cpu_count: 10
+                cpu_count_logical: 10
+                disk:
+                    /:
+                        total: "494384795648"
+                        used: "448412078080"
+                email: m1randa@mit.edu
+                executable: /Users/miranda/miniconda3/envs/tversky_sirl/bin/python
+                git:
+                    commit: c30c99f2310325531a433e666ead0b17d66535c1
+                host: Mirandas-MacBook-Air-2.local
+                memory:
+                    total: "17179869184"
+                os: macOS-15.6.1-arm64-arm-64bit
+                program: /Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky/src/runner.py
+                python: CPython 3.12.12
+                root: /Users/miranda/code/mit/summer26/ahri/tversky_sirl/experiments/005-sirl-tversky
+                startedAt: "2026-08-12T20:24:54.555753Z"
+                writerId: 7ibf4iqgq16dzjl29ujqxq2m0dcodf5z
+        m: []
+        python_version: 3.12.12
+        t:
+            "1":
+                - 1
+                - 5
+                - 53
+            "2":
+                - 1
+                - 5
+                - 53
+            "3":
+                - 2
+                - 16
+            "4": 3.12.12
+            "5": 0.28.1
+            "12": 0.28.1
+            "13": darwin-arm64
+data:
+    value:
+        dataset_name: gridrobot_1960
+        path: simulated_data/001-gridrobot/data/gridrobot_1960.npz
+eval:
+    value:
+        - max_pairs: 1000
+          method: query
+        - method: tsne
+experiment_name:
+    value: tiny
+model:
+    value:
+        batch_size: 16
+        difference_reduction: substractmatch
+        fbank_size: 16
+        intersection_reduction: product
+        load_ckpt: false
+        log_interval: 100
+        lr: 0.01
+        lr_decay: 0.99999
+        name: no_sirl_ts
+        num_epochs: 8000
+        similarity_model: contrast
+        tau: 0.1
+seeds:
+    value:
+        - 0

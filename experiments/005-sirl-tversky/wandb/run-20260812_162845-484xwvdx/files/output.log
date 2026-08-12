@@ -1,0 +1,161 @@
+Epoch    0 | loss=44.3705 | triplet_acc=0.507 | lr=0.01000
+           | s_ap: mean=178.0001 std=107.9140 | s_an: mean=179.2878 std=111.6794 | gap(mean s_ap-s_an)=-1.2877
+Epoch  100 | loss=0.1452 | triplet_acc=0.488 | lr=0.00999
+           | s_ap: mean=0.0796 std=0.5361 | s_an: mean=0.1041 std=0.6778 | gap(mean s_ap-s_an)=-0.0244
+Epoch  200 | loss=0.0985 | triplet_acc=0.407 | lr=0.00998
+           | s_ap: mean=0.0137 std=0.1872 | s_an: mean=0.0117 std=0.2641 | gap(mean s_ap-s_an)=0.0019
+Epoch  300 | loss=0.1142 | triplet_acc=0.369 | lr=0.00997
+           | s_ap: mean=0.0117 std=0.1250 | s_an: mean=0.0062 std=0.1810 | gap(mean s_ap-s_an)=0.0054
+Epoch  400 | loss=0.0933 | triplet_acc=0.348 | lr=0.00996
+           | s_ap: mean=0.0166 std=0.0961 | s_an: mean=0.0127 std=0.1383 | gap(mean s_ap-s_an)=0.0039
+Epoch  500 | loss=0.0861 | triplet_acc=0.313 | lr=0.00995
+           | s_ap: mean=0.0126 std=0.0810 | s_an: mean=0.0063 std=0.1165 | gap(mean s_ap-s_an)=0.0063
+Epoch  600 | loss=0.1055 | triplet_acc=0.311 | lr=0.00994
+           | s_ap: mean=0.0105 std=0.0753 | s_an: mean=0.0023 std=0.1087 | gap(mean s_ap-s_an)=0.0082
+Epoch  700 | loss=0.0888 | triplet_acc=0.290 | lr=0.00993
+           | s_ap: mean=0.0117 std=0.0683 | s_an: mean=0.0041 std=0.0960 | gap(mean s_ap-s_an)=0.0076
+Epoch  800 | loss=0.1057 | triplet_acc=0.307 | lr=0.00992
+           | s_ap: mean=0.0106 std=0.0718 | s_an: mean=-0.0006 std=0.1017 | gap(mean s_ap-s_an)=0.0111
+Epoch  900 | loss=0.1197 | triplet_acc=0.312 | lr=0.00991
+           | s_ap: mean=0.0109 std=0.0709 | s_an: mean=-0.0008 std=0.1000 | gap(mean s_ap-s_an)=0.0117
+Epoch 1000 | loss=0.0801 | triplet_acc=0.284 | lr=0.00990
+           | s_ap: mean=0.0134 std=0.0628 | s_an: mean=0.0055 std=0.0828 | gap(mean s_ap-s_an)=0.0078
+Epoch 1100 | loss=0.1126 | triplet_acc=0.277 | lr=0.00989
+           | s_ap: mean=0.0124 std=0.0664 | s_an: mean=0.0021 std=0.0896 | gap(mean s_ap-s_an)=0.0103
+Epoch 1200 | loss=0.1039 | triplet_acc=0.281 | lr=0.00988
+           | s_ap: mean=0.0120 std=0.0658 | s_an: mean=0.0017 std=0.0881 | gap(mean s_ap-s_an)=0.0103
+Epoch 1300 | loss=0.0968 | triplet_acc=0.249 | lr=0.00987
+           | s_ap: mean=0.0085 std=0.0642 | s_an: mean=-0.0049 std=0.0945 | gap(mean s_ap-s_an)=0.0134
+Epoch 1400 | loss=0.0783 | triplet_acc=0.313 | lr=0.00986
+           | s_ap: mean=0.0143 std=0.0749 | s_an: mean=0.0006 std=0.1026 | gap(mean s_ap-s_an)=0.0137
+Epoch 1500 | loss=0.0969 | triplet_acc=0.230 | lr=0.00985
+           | s_ap: mean=0.0106 std=0.0590 | s_an: mean=-0.0003 std=0.0806 | gap(mean s_ap-s_an)=0.0109
+Epoch 1600 | loss=0.0971 | triplet_acc=0.200 | lr=0.00984
+           | s_ap: mean=0.0094 std=0.0612 | s_an: mean=-0.0031 std=0.0867 | gap(mean s_ap-s_an)=0.0125
+Epoch 1700 | loss=0.0985 | triplet_acc=0.159 | lr=0.00983
+           | s_ap: mean=0.0105 std=0.0660 | s_an: mean=-0.0007 std=0.0906 | gap(mean s_ap-s_an)=0.0112
+Epoch 1800 | loss=0.0957 | triplet_acc=0.196 | lr=0.00982
+           | s_ap: mean=0.0088 std=0.0689 | s_an: mean=-0.0043 std=0.0942 | gap(mean s_ap-s_an)=0.0131
+Epoch 1900 | loss=0.1272 | triplet_acc=0.171 | lr=0.00981
+           | s_ap: mean=0.0098 std=0.0657 | s_an: mean=-0.0028 std=0.0911 | gap(mean s_ap-s_an)=0.0125
+Epoch 2000 | loss=0.0883 | triplet_acc=0.194 | lr=0.00980
+           | s_ap: mean=0.0116 std=0.0710 | s_an: mean=-0.0012 std=0.0943 | gap(mean s_ap-s_an)=0.0127
+Epoch 2100 | loss=0.0908 | triplet_acc=0.145 | lr=0.00979
+           | s_ap: mean=0.0110 std=0.0627 | s_an: mean=0.0022 std=0.0796 | gap(mean s_ap-s_an)=0.0088
+Epoch 2200 | loss=0.1041 | triplet_acc=0.141 | lr=0.00978
+           | s_ap: mean=0.0097 std=0.0688 | s_an: mean=-0.0041 std=0.0983 | gap(mean s_ap-s_an)=0.0137
+Epoch 2300 | loss=0.0879 | triplet_acc=0.140 | lr=0.00977
+           | s_ap: mean=0.0093 std=0.0634 | s_an: mean=-0.0023 std=0.0875 | gap(mean s_ap-s_an)=0.0117
+Epoch 2400 | loss=0.0960 | triplet_acc=0.154 | lr=0.00976
+           | s_ap: mean=0.0117 std=0.0630 | s_an: mean=0.0033 std=0.0771 | gap(mean s_ap-s_an)=0.0085
+Epoch 2500 | loss=0.1046 | triplet_acc=0.135 | lr=0.00975
+           | s_ap: mean=0.0088 std=0.0601 | s_an: mean=-0.0022 std=0.0827 | gap(mean s_ap-s_an)=0.0110
+Epoch 2600 | loss=0.0938 | triplet_acc=0.138 | lr=0.00974
+           | s_ap: mean=0.0104 std=0.0618 | s_an: mean=0.0002 std=0.0796 | gap(mean s_ap-s_an)=0.0102
+Epoch 2700 | loss=0.1104 | triplet_acc=0.133 | lr=0.00973
+           | s_ap: mean=0.0112 std=0.0720 | s_an: mean=-0.0018 std=0.0975 | gap(mean s_ap-s_an)=0.0130
+Epoch 2800 | loss=0.0887 | triplet_acc=0.126 | lr=0.00972
+           | s_ap: mean=0.0101 std=0.0645 | s_an: mean=-0.0011 std=0.0860 | gap(mean s_ap-s_an)=0.0113
+Epoch 2900 | loss=0.0963 | triplet_acc=0.123 | lr=0.00971
+           | s_ap: mean=0.0093 std=0.0639 | s_an: mean=-0.0020 std=0.0864 | gap(mean s_ap-s_an)=0.0113
+Epoch 3000 | loss=0.0842 | triplet_acc=0.139 | lr=0.00970
+           | s_ap: mean=0.0115 std=0.0747 | s_an: mean=-0.0026 std=0.1009 | gap(mean s_ap-s_an)=0.0141
+Epoch 3100 | loss=0.0945 | triplet_acc=0.156 | lr=0.00969
+           | s_ap: mean=0.0181 std=0.0895 | s_an: mean=0.0071 std=0.1079 | gap(mean s_ap-s_an)=0.0110
+Epoch 3200 | loss=0.0958 | triplet_acc=0.152 | lr=0.00968
+           | s_ap: mean=0.0146 std=0.0864 | s_an: mean=-0.0009 std=0.1130 | gap(mean s_ap-s_an)=0.0154
+Epoch 3300 | loss=0.0993 | triplet_acc=0.109 | lr=0.00968
+           | s_ap: mean=0.0120 std=0.0748 | s_an: mean=0.0019 std=0.0931 | gap(mean s_ap-s_an)=0.0102
+Epoch 3400 | loss=0.0921 | triplet_acc=0.105 | lr=0.00967
+           | s_ap: mean=0.0099 std=0.0639 | s_an: mean=0.0028 std=0.0760 | gap(mean s_ap-s_an)=0.0071
+Epoch 3500 | loss=0.0875 | triplet_acc=0.109 | lr=0.00966
+           | s_ap: mean=0.0125 std=0.0809 | s_an: mean=0.0016 std=0.1008 | gap(mean s_ap-s_an)=0.0110
+Epoch 3600 | loss=0.0983 | triplet_acc=0.103 | lr=0.00965
+           | s_ap: mean=0.0082 std=0.0632 | s_an: mean=-0.0020 std=0.0841 | gap(mean s_ap-s_an)=0.0102
+Epoch 3700 | loss=0.0977 | triplet_acc=0.104 | lr=0.00964
+           | s_ap: mean=0.0097 std=0.0679 | s_an: mean=0.0015 std=0.0820 | gap(mean s_ap-s_an)=0.0081
+Epoch 3800 | loss=0.0920 | triplet_acc=0.136 | lr=0.00963
+           | s_ap: mean=0.0183 std=0.0958 | s_an: mean=0.0056 std=0.1160 | gap(mean s_ap-s_an)=0.0127
+Epoch 3900 | loss=0.1000 | triplet_acc=0.103 | lr=0.00962
+           | s_ap: mean=0.0101 std=0.0734 | s_an: mean=0.0009 std=0.0898 | gap(mean s_ap-s_an)=0.0092
+Epoch 4000 | loss=0.0938 | triplet_acc=0.108 | lr=0.00961
+           | s_ap: mean=0.0130 std=0.0845 | s_an: mean=-0.0005 std=0.1079 | gap(mean s_ap-s_an)=0.0135
+Epoch 4100 | loss=0.0950 | triplet_acc=0.089 | lr=0.00960
+           | s_ap: mean=0.0103 std=0.0752 | s_an: mean=-0.0007 std=0.0949 | gap(mean s_ap-s_an)=0.0110
+Epoch 4200 | loss=0.0813 | triplet_acc=0.094 | lr=0.00959
+           | s_ap: mean=0.0101 std=0.0736 | s_an: mean=-0.0008 std=0.0934 | gap(mean s_ap-s_an)=0.0108
+Epoch 4300 | loss=0.0938 | triplet_acc=0.126 | lr=0.00958
+           | s_ap: mean=0.0213 std=0.1107 | s_an: mean=0.0103 std=0.1285 | gap(mean s_ap-s_an)=0.0110
+Epoch 4400 | loss=0.1000 | triplet_acc=0.088 | lr=0.00957
+           | s_ap: mean=0.0117 std=0.0757 | s_an: mean=0.0062 std=0.0839 | gap(mean s_ap-s_an)=0.0055
+Epoch 4500 | loss=0.1062 | triplet_acc=0.089 | lr=0.00956
+           | s_ap: mean=0.0142 std=0.0876 | s_an: mean=0.0076 std=0.0977 | gap(mean s_ap-s_an)=0.0067
+Epoch 4600 | loss=0.1000 | triplet_acc=0.103 | lr=0.00955
+           | s_ap: mean=0.0186 std=0.1048 | s_an: mean=0.0081 std=0.1183 | gap(mean s_ap-s_an)=0.0104
+Epoch 4700 | loss=0.0976 | triplet_acc=0.094 | lr=0.00954
+           | s_ap: mean=0.0164 std=0.0949 | s_an: mean=0.0080 std=0.1043 | gap(mean s_ap-s_an)=0.0084
+Epoch 4800 | loss=0.0989 | triplet_acc=0.101 | lr=0.00953
+           | s_ap: mean=0.0195 std=0.1115 | s_an: mean=0.0087 std=0.1243 | gap(mean s_ap-s_an)=0.0109
+Epoch 4900 | loss=0.0920 | triplet_acc=0.078 | lr=0.00952
+           | s_ap: mean=0.0149 std=0.1011 | s_an: mean=0.0051 std=0.1145 | gap(mean s_ap-s_an)=0.0098
+Epoch 5000 | loss=0.0970 | triplet_acc=0.106 | lr=0.00951
+           | s_ap: mean=0.0225 std=0.1433 | s_an: mean=0.0082 std=0.1644 | gap(mean s_ap-s_an)=0.0143
+Epoch 5100 | loss=0.0938 | triplet_acc=0.100 | lr=0.00950
+           | s_ap: mean=0.0230 std=0.1339 | s_an: mean=0.0109 std=0.1480 | gap(mean s_ap-s_an)=0.0122
+Epoch 5200 | loss=0.0954 | triplet_acc=0.138 | lr=0.00949
+           | s_ap: mean=0.0446 std=0.2379 | s_an: mean=0.0329 std=0.2553 | gap(mean s_ap-s_an)=0.0117
+Epoch 5300 | loss=0.1012 | triplet_acc=0.101 | lr=0.00948
+           | s_ap: mean=0.0239 std=0.1347 | s_an: mean=0.0129 std=0.1471 | gap(mean s_ap-s_an)=0.0110
+Epoch 5400 | loss=0.1000 | triplet_acc=0.102 | lr=0.00947
+           | s_ap: mean=0.0238 std=0.1337 | s_an: mean=0.0144 std=0.1430 | gap(mean s_ap-s_an)=0.0094
+Epoch 5500 | loss=0.0867 | triplet_acc=0.117 | lr=0.00946
+           | s_ap: mean=0.0295 std=0.1427 | s_an: mean=0.0245 std=0.1462 | gap(mean s_ap-s_an)=0.0050
+Epoch 5600 | loss=0.1013 | triplet_acc=0.090 | lr=0.00946
+           | s_ap: mean=0.0216 std=0.1324 | s_an: mean=0.0148 std=0.1382 | gap(mean s_ap-s_an)=0.0068
+Epoch 5700 | loss=0.0945 | triplet_acc=0.094 | lr=0.00945
+           | s_ap: mean=0.0217 std=0.1337 | s_an: mean=0.0125 std=0.1423 | gap(mean s_ap-s_an)=0.0092
+Epoch 5800 | loss=0.0960 | triplet_acc=0.091 | lr=0.00944
+           | s_ap: mean=0.0246 std=0.1423 | s_an: mean=0.0154 std=0.1500 | gap(mean s_ap-s_an)=0.0092
+Epoch 5900 | loss=0.0972 | triplet_acc=0.099 | lr=0.00943
+           | s_ap: mean=0.0304 std=0.1709 | s_an: mean=0.0189 std=0.1809 | gap(mean s_ap-s_an)=0.0115
+Epoch 6000 | loss=0.1047 | triplet_acc=0.125 | lr=0.00942
+           | s_ap: mean=0.0446 std=0.1943 | s_an: mean=0.0347 std=0.2025 | gap(mean s_ap-s_an)=0.0100
+Epoch 6100 | loss=0.0942 | triplet_acc=0.127 | lr=0.00941
+           | s_ap: mean=0.0595 std=0.2526 | s_an: mean=0.0455 std=0.2669 | gap(mean s_ap-s_an)=0.0139
+Epoch 6200 | loss=0.0970 | triplet_acc=0.119 | lr=0.00940
+           | s_ap: mean=0.0506 std=0.2198 | s_an: mean=0.0414 std=0.2281 | gap(mean s_ap-s_an)=0.0093
+Epoch 6300 | loss=0.0882 | triplet_acc=0.077 | lr=0.00939
+           | s_ap: mean=0.0208 std=0.1339 | s_an: mean=0.0130 std=0.1398 | gap(mean s_ap-s_an)=0.0078
+Epoch 6400 | loss=0.0991 | triplet_acc=0.086 | lr=0.00938
+           | s_ap: mean=0.0264 std=0.1653 | s_an: mean=0.0152 std=0.1753 | gap(mean s_ap-s_an)=0.0112
+Epoch 6500 | loss=0.1041 | triplet_acc=0.084 | lr=0.00937
+           | s_ap: mean=0.0268 std=0.1634 | s_an: mean=0.0176 std=0.1700 | gap(mean s_ap-s_an)=0.0092
+Epoch 6600 | loss=0.0875 | triplet_acc=0.070 | lr=0.00936
+           | s_ap: mean=0.0192 std=0.1303 | s_an: mean=0.0118 std=0.1361 | gap(mean s_ap-s_an)=0.0074
+Epoch 6700 | loss=0.1000 | triplet_acc=0.075 | lr=0.00935
+           | s_ap: mean=0.0209 std=0.1410 | s_an: mean=0.0133 std=0.1471 | gap(mean s_ap-s_an)=0.0076
+Epoch 6800 | loss=0.1047 | triplet_acc=0.076 | lr=0.00934
+           | s_ap: mean=0.0228 std=0.1475 | s_an: mean=0.0183 std=0.1498 | gap(mean s_ap-s_an)=0.0045
+Epoch 6900 | loss=0.1000 | triplet_acc=0.073 | lr=0.00933
+           | s_ap: mean=0.0227 std=0.1519 | s_an: mean=0.0157 std=0.1567 | gap(mean s_ap-s_an)=0.0070
+Epoch 7000 | loss=0.0847 | triplet_acc=0.090 | lr=0.00932
+           | s_ap: mean=0.0373 std=0.2079 | s_an: mean=0.0268 std=0.2163 | gap(mean s_ap-s_an)=0.0105
+Epoch 7100 | loss=0.0938 | triplet_acc=0.064 | lr=0.00931
+           | s_ap: mean=0.0230 std=0.1619 | s_an: mean=0.0149 std=0.1690 | gap(mean s_ap-s_an)=0.0081
+Epoch 7200 | loss=0.1000 | triplet_acc=0.095 | lr=0.00931
+           | s_ap: mean=0.0347 std=0.1849 | s_an: mean=0.0294 std=0.1878 | gap(mean s_ap-s_an)=0.0054
+Epoch 7300 | loss=0.1000 | triplet_acc=0.077 | lr=0.00930
+           | s_ap: mean=0.0279 std=0.1805 | s_an: mean=0.0225 std=0.1835 | gap(mean s_ap-s_an)=0.0054
+Epoch 7400 | loss=0.1041 | triplet_acc=0.104 | lr=0.00929
+           | s_ap: mean=0.0405 std=0.2099 | s_an: mean=0.0337 std=0.2129 | gap(mean s_ap-s_an)=0.0068
+Epoch 7500 | loss=0.1084 | triplet_acc=0.103 | lr=0.00928
+           | s_ap: mean=0.0391 std=0.2037 | s_an: mean=0.0333 std=0.2060 | gap(mean s_ap-s_an)=0.0059
+Epoch 7600 | loss=0.0938 | triplet_acc=0.116 | lr=0.00927
+           | s_ap: mean=0.0479 std=0.2340 | s_an: mean=0.0376 std=0.2399 | gap(mean s_ap-s_an)=0.0102
+Epoch 7700 | loss=0.0993 | triplet_acc=0.121 | lr=0.00926
+           | s_ap: mean=0.0595 std=0.2486 | s_an: mean=0.0560 std=0.2497 | gap(mean s_ap-s_an)=0.0036
+Epoch 7800 | loss=0.0944 | triplet_acc=0.093 | lr=0.00925
+           | s_ap: mean=0.0413 std=0.2330 | s_an: mean=0.0298 std=0.2407 | gap(mean s_ap-s_an)=0.0115
+Epoch 7900 | loss=0.0892 | triplet_acc=0.149 | lr=0.00924
+           | s_ap: mean=0.0913 std=0.3610 | s_an: mean=0.0779 std=0.3697 | gap(mean s_ap-s_an)=0.0134
+model saved to results/tiny/tiny_1786566524.pth
