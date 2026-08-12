@@ -29,6 +29,8 @@ def train_model(config, data, results_dir, seed):
         model = train_triplet_tversky_sim(config, anchors, positives, negatives, wandb_run)
         ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
+        
+        run.finish()
         return model, ckpt_path
 
     # if config["experiment_name"] == "ljts_triplet":
