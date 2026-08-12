@@ -9,10 +9,16 @@ from sklearn.linear_model import LinearRegression
 from tversky_utils import retrieve_semantic_expression
 from sklearn.manifold import TSNE
 import plotly.express as px
+from plotly.subplots import make_subplots
 # from encoders import *
 
 # raw feature columns in data["features"], in order (matches make_tversky_report.py)
 FEATURE_NAMES = ["laptop (computer_dist)", "upright (joint_up)"]
+
+# stacked-bar segment colors, bottom -> top: the two "not both nonempty" greys, then a
+# blue ramp for the nested significance bands (see plot_query_stacked_bars).
+BASE_COLORS = ["#e0e0e0", "#9e9e9e"]
+SIG_COLORS  = ["#cfe1f2", "#7fb8de", "#3a8bc7", "#1b4f8a"]
 
 
 def eval_model(config, data, model):
@@ -341,7 +347,63 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
         fb, iv = bank_feature_and_instances(bank_label)
         results[bank_label] = eval_one_bank(fb, iv)
 
+    results_dir = Path("results") / config["experiment_name"]
+    out_path = plot_query_stacked_bars(results, config["experiment_name"], alphas, results_dir)
+    print(f"stacked bars saved to {out_path}")
+
     return results
+
+
+def plot_query_stacked_bars(results, expt_name, alphas, results_dir):
+    """Stacked bars of the query eval, one subplot column per Tversky bank.
+
+    Adapted from 003-tversky-methods-all-eval/src/plot_stacked_bars.py: that script
+    sweeps a hyperparameter on the x axis and sums over seeds, whereas here we have a
+    single run, so the x axis is the feature instead.
+
+    Each bar stacks (bottom -> top):
+      neither nonempty : n_nonempty_hist[0]
+      one nonempty     : n_nonempty_hist[1]
+      then n_nonempty_hist[2] (== what the t-test ran on) split by NESTED significance
+      into incremental bands: both/n.s. | p<0.05 | p<0.01 | p<0.001  (sum == hist[2])
+    """
+    # alphas nest from loosest to strictest, so each band is the difference of counts
+    alphas_desc = sorted(alphas, reverse=True)
+    labels = ["neither nonempty", "one nonempty", "both, n.s."]
+    labels += [f"both, p<{a}" for a in alphas_desc]
+    colors = BASE_COLORS + [SIG_COLORS[i % len(SIG_COLORS)] for i in range(len(alphas_desc) + 1)]
+
+    def segments(fd):
+        h, s = fd["n_nonempty_hist"], fd["n_significant"]
+        counts = [s.get(a, 0) for a in alphas_desc]
+        # h[2] - loosest, then loosest - next, ..., strictest
+        bands = [h.get(2, 0) - (counts[0] if counts else 0)]
+        bands += [counts[i] - counts[i + 1] for i in range(len(counts) - 1)]
+        if counts:
+            bands.append(counts[-1])
+        return [h.get(0, 0), h.get(1, 0), *bands]
+
+    banks = list(results)
+    fig = make_subplots(rows=1, cols=len(banks), shared_yaxes=True,
+                        column_titles=banks, horizontal_spacing=0.07)
+    first = True                       # legend once, across the whole grid
+    for ci, bank in enumerate(banks, 1):
+        feats = list(results[bank])
+        rows = [segments(results[bank][f]) for f in feats]
+        for si, (label, color) in enumerate(zip(labels, colors)):
+            fig.add_bar(x=feats, y=[r[si] for r in rows], name=label, marker_color=color,
+                        legendgroup=label, showlegend=first, row=1, col=ci)
+        first = False
+    fig.update_layout(barmode="stack", template="plotly_white", bargap=0.28,
+                      title=f"{expt_name}: nonempty + significance by feature",
+                      legend_title_text="pair category")
+    fig.update_xaxes(type="category")
+    fig.update_yaxes(title_text="# pairs", col=1)
+
+    results_dir.mkdir(parents=True, exist_ok=True)
+    out_path = results_dir / f"{expt_name}_query_stacked_bars.png"
+    fig.write_image(out_path)
+    return out_path
 
 
 def tversky_sim_tsne(config, data, model):
