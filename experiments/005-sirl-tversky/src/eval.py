@@ -21,7 +21,7 @@ BASE_COLORS = ["#e0e0e0", "#9e9e9e"]
 SIG_COLORS  = ["#cfe1f2", "#7fb8de", "#3a8bc7", "#1b4f8a"]
 
 
-def eval_model(config, data, model):
+def eval_model(config, data, model, unix_timestamp):
     """
     eval
     """
@@ -46,7 +46,7 @@ def eval_model(config, data, model):
             }
             all_eval = all_eval | tpa_dict
         if method == "query":
-            query = eval_queries(config, data, model, entry)   # {bank: {feature: ...}}
+            query = eval_queries(config, data, model, eval_params=entry, unix_timestamp=unix_timestamp)   # {bank: {feature: ...}}
             print("QUERY RESULTS")
             for bank_name, bank_query in query.items():        # "proj" and/or "sim"
                 for f_name in FEATURE_NAMES:
@@ -57,7 +57,7 @@ def eval_model(config, data, model):
                 all_eval[f"query_{bank_name}"] = bank_query
             all_eval = all_eval | {"query": query}
         if method == "tsne":
-            results_dir = tversky_sim_tsne(config, data, model)
+            results_dir = tversky_sim_tsne(config, data, model, unix_timestamp)
             print(f"figures saved into {results_dir}")
     return all_eval
 
@@ -159,7 +159,15 @@ def eval_tpa(config, data, model):
     return tpas
 
 
-def eval_queries(config, data, model, eval_params=None, train_config=None, save_pairs=False):
+def eval_queries(
+        config, 
+        data, 
+        model, 
+        eval_params=None, 
+        unix_timestamp=None,
+        train_config=None, 
+        save_pairs=False, 
+        ):
     """
     * all possible pairs for min / max joint angle, min / max laptop, and see how often non-empty queries with significant t-test of means happens
         * get {set of trajs with max joint angle feature value} {set of trajs with min joint angle feature value}
@@ -348,13 +356,13 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
         results[bank_label] = eval_one_bank(fb, iv)
 
     results_dir = Path("results") / config["experiment_name"]
-    out_path = plot_query_stacked_bars(results, config["experiment_name"], alphas, results_dir)
+    out_path = plot_query_stacked_bars(results, config["experiment_name"], alphas, results_dir, unix_timestamp)
     print(f"stacked bars saved to {out_path}")
 
     return results
 
 
-def plot_query_stacked_bars(results, expt_name, alphas, results_dir):
+def plot_query_stacked_bars(results, expt_name, alphas, results_dir, unix_timestamp):
     """Stacked bars of the query eval, one subplot column per Tversky bank.
 
     Adapted from 003-tversky-methods-all-eval/src/plot_stacked_bars.py: that script
@@ -401,12 +409,12 @@ def plot_query_stacked_bars(results, expt_name, alphas, results_dir):
     fig.update_yaxes(title_text="# pairs", col=1)
 
     results_dir.mkdir(parents=True, exist_ok=True)
-    out_path = results_dir / f"{expt_name}_query_stacked_bars.png"
+    out_path = results_dir / f"{expt_name}_{unix_timestamp}_query_stacked_bars.png"
     fig.write_image(out_path)
     return out_path
 
 
-def tversky_sim_tsne(config, data, model):
+def tversky_sim_tsne(config, data, model, unix_timestamp):
     expt_name = config["experiment_name"]
 
     all_trajs = data["trajs"]
@@ -431,5 +439,5 @@ def tversky_sim_tsne(config, data, model):
                         color= all_feats[:, feat_idx],
                         title=f"{expt_name} similarity, colored by {feat}"
                         )
-        fig.write_image(results_dir / f"{expt_name}_tsne_feat_{feat}.png")
+        fig.write_image(results_dir / f"{expt_name}_{unix_timestamp}_tsne_{feat}.png")
     return results_dir

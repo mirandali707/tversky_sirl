@@ -1,15 +1,13 @@
-import time
 import numpy as np
 import wandb
 from ljts_triplet import train_triplet_tversky_sim
 
-def train_model(config, data, results_dir, seed):
+def train_model(config, data, results_dir, seed, unix_timestamp):
     """
     NOTE we are only training on the laptop feature -
     from all trajectories and their feature values, we extract only trajectories with max or min laptop distance
     and train just the TverskySimilarity layer with InfoNCE loss on those
     """
-    unix_timestamp = int(time.time())
     expt_name = config["experiment_name"]
     run = wandb.init(
         # Set the wandb entity where your project will be logged (generally your team name).

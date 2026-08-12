@@ -1,5 +1,4 @@
 from tversky import nn as tnn
-from info_nce import InfoNCE, info_nce
 import numpy as np
 import torch
 import torch.nn as nn
@@ -94,6 +93,7 @@ def train_triplet_tversky_sim(
 
     # Adam now optimizes encoder + Tversky feature bank + α/β/θ
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    # optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     scheduler = ExponentialLR(optimizer, gamma=lr_decay)
 
     A = torch.as_tensor(anchors, dtype=torch.float32, device=device).flatten(start_dim=1)
@@ -109,11 +109,10 @@ def train_triplet_tversky_sim(
         idx = torch.as_tensor(idx, device=device)
         a, p, n = A[idx], P[idx], N[idx]
 
-        # if symmetric:
-        #     loss = symmetric_triplet_loss(model, a, p, n, margin)
-        # else:
-        #     loss = asymmetric_triplet_loss(model, a, p, n, margin)
-        loss = new_triplet_loss(model, a, p, n, margin)
+        if symmetric:
+            loss = symmetric_triplet_loss(model, a, p, n, margin)
+        else:
+            loss = asymmetric_triplet_loss(model, a, p, n, margin)
 
         optimizer.zero_grad()
         loss.backward()
@@ -181,42 +180,24 @@ def random_init_no_training_tversky_sim(
     return model
 
 
-def _margin_ranking_loss(s_pos, s_neg, margin):
-    """
-    Triplet margin loss on *similarities* (not distances):
-    encourage sim(anchor, positive) to exceed sim(anchor, negative) by `margin`.
-        L = mean( relu(margin - s_pos + s_neg) )
-    """
-    return F.relu(margin - s_pos + s_neg).mean()
-
-
 def symmetric_triplet_loss(model, anchor, pos, neg, margin=1.0):
     """
-    Symmetric triplet loss (SIRL Eq. 2) adapted for a similarity model:
-        L = L_trip(A, P, N) + L_trip(P, A, N)
+    NOTE made to work with Tversky Similarity params:
+    similarity_model: ratio 
+    normalize:True
 
-    Since the original similarity query has no explicit anchor (just
-    "which two are most similar"), both similar trajectories take turns
-    as the anchor. TverskySimilarity is itself asymmetric, so the two
-    terms are genuinely different.
+    so that Tversky Similarity values are always between 0 and 1.
     """
-    loss_ap = _margin_ranking_loss(model.similarity(anchor, pos),
-                                   model.similarity(anchor, neg), margin)
-    loss_pa = _margin_ranking_loss(model.similarity(pos, anchor),
-                                   model.similarity(pos, neg), margin)
-    return loss_ap + loss_pa
+    loss_fn = nn.TripletMarginWithDistanceLoss(
+        distance_function=model.distance, 
+        margin=margin, 
+        reduction='mean',
+        # swap=True # hard-negative mining uses min(d(a,n), d(p,n)) as the signal: https://bmva-archive.org.uk/bmvc/2016/papers/paper119/paper119.pdf
+    )
+    return loss_fn(anchor, pos, neg) + loss_fn(pos, anchor, neg)
 
 
 def asymmetric_triplet_loss(model, anchor, pos, neg, margin=1.0):
-    """
-    normal triplet loss, which is what Similarity (in similarity.py) does...
-    """
-    loss_ap = _margin_ranking_loss(model.similarity(anchor, pos),
-                                   model.similarity(anchor, neg), margin)
-    return loss_ap
-
-
-def new_triplet_loss(model, anchor, pos, neg, margin=0.1):
     """
     NOTE made to work with Tversky Similarity params:
     similarity_model: ratio 

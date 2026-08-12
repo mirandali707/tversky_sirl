@@ -6,7 +6,7 @@ data:
 model:
     load_ckpt: False
     name: no_sirl_ts
-    num_epochs: 8000
+    num_epochs: 5000
     lr: 0.01
     lr_decay: 0.99999
     log_interval: 100
@@ -15,7 +15,7 @@ model:
     intersection_reduction: product
     difference_reduction: substractmatch
     normalize: True
-    symmetric: False
+    symmetric: [True, False] 
     # margin: 0.05
 eval:
     - method: query

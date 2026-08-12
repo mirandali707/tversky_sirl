@@ -6,6 +6,7 @@ from pathlib import Path
 from utils import *
 from models import train_model
 from eval import eval_model
+import time
 
 
 def parse_command_line_args():
@@ -68,10 +69,11 @@ def main(config):
             } | param_permutation # add this permutation of listed params to the row
             set_all_seeds(seed)
 
-            model, ckpt_path = train_model(curr_config, data, results_dir, seed)
+            unix_timestamp = int(time.time())
+            model, ckpt_path = train_model(curr_config, data, results_dir, seed, unix_timestamp)
             row["ckpt_path"] = ckpt_path
 
-            results = eval_model(curr_config, data, model)
+            results = eval_model(curr_config, data, model, unix_timestamp)
             row = row | results # add results to row
             rows.append(row)
             results_df = pd.DataFrame(rows)
