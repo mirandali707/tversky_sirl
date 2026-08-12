@@ -1,12 +1,14 @@
 import itertools
 import warnings
-
+from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
 from scipy import stats
 from sklearn.linear_model import LinearRegression
 from tversky_utils import retrieve_semantic_expression
+from sklearn.manifold import TSNE
+import plotly.express as px
 # from encoders import *
 
 # raw feature columns in data["features"], in order (matches make_tversky_report.py)
@@ -196,6 +198,7 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
     # --- which Tversky feature banks does this model have? ---
     train_config = train_config or config          # falls back to `config` if it holds ["model"]
     model_name = train_config["model"]["name"]
+    # TODO change for just tverskysim
     banks_present = {
         "literally_just_tversky_sim":   ["sim_only"],
         "tversky_sirl":   ["sim"],
@@ -335,3 +338,31 @@ def eval_queries(config, data, model, eval_params=None, train_config=None, save_
         results[bank_label] = eval_one_bank(fb, iv)
 
     return results
+
+
+def tversky_sim_tsne(config, data, model):
+    expt_name = config["experiment_name"]
+
+    all_trajs = data["trajs"]
+    all_feats = data["features"]
+
+    # TODO add encoder
+    all_sim = model.similarity(all_trajs, all_trajs)
+    t_sne = TSNE(
+        n_components=2,
+        init="random",
+        random_state=0,
+        metric="precomputed" # we pass in pairways similarity matrix
+    )
+    ts_t_sne = t_sne.fit_transform(all_sim.detach().numpy())
+
+    results_dir = Path("results") / expt_name
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    for feat_idx, feat in enumerate(["laptop", "upright"]):
+        fig = px.scatter(x=ts_t_sne[:,0], 
+                        y=ts_t_sne[:,1],
+                        color= all_feats[:, feat_idx],
+                        title=f"{expt_name} similarity, colored by {feat}"
+                        )
+        fig.write_image(results_dir / f"{expt_name}_tsne_feat_{feat}.png")
