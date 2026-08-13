@@ -143,7 +143,6 @@ def train_triplet_tversky_sim(
                 # print("functional alpha", alpha, "functional beta", beta)
                 if wandb_run:
                     wandb_run.log({
-                        "epoch": epoch, 
                         "acc": acc, 
                         "loss": loss, 
                         "lr": curr_lr,
@@ -154,7 +153,7 @@ def train_triplet_tversky_sim(
                         "mean_gap_sap_san": mean_gap_sap_san,
                         "alpha": alpha,
                         "beta": beta
-                        })
+                        }, step=epoch)
             print(f"Epoch {epoch:4d} | loss={loss.item():.4f} | "
                   f"triplet_acc={acc:.3f} | lr={curr_lr:.5f}")
             # collapse diagnostic: if s_pos ~= s_neg (mean gap ~0, small std),
