@@ -16,9 +16,13 @@ SIRL -> TverskySim (trained with InfoNCE loss) (from expt 004)
 	![](results/random_no_sirl_ts/random_no_sirl_ts_1786628652_tsne_laptop.png)
 * `baseline.yaml` / `no_sirl_ts`: raw trajectory -> train TverskySim
 ![](figs/no_sirl_ts_fbank_size.png)
-	* seems to be learning something, drawing all e.g. high laptop points together, somewhat noisily
+	* seems to be learning something, drawing all e.g. high laptop points together, somewhat noisily; bad on upright
 	![](results/no_sirl_ts/no_sirl_ts_1786627879_tsne_laptop.png)
-* raw trajectory -> SIRL (checkpoint, frozen) -> train TverskySim
+* `frozen_sirl_ts.yaml` / `frozen_sirl_ts`: raw trajectory -> SIRL (checkpoint, frozen) -> train TverskySim
+![](figs/frozen_sirl_ts_fbank_size.png)
+	* more successfully draws high laptop / upright points close together
+	![](results/frozen_sirl_ts/frozen_sirl_ts_1786635013_tsne_laptop.png)
+	![](results/frozen_sirl_ts/frozen_sirl_ts_1786635013_tsne_upright.png)
 * raw trajectory -> SIRL -> TverskySim end-to-end, all unfrozen
 
 # new changes
@@ -27,3 +31,4 @@ SIRL -> TverskySim (trained with InfoNCE loss) (from expt 004)
 * triplet loss now uses Pytorch's TripletMarginWithDistanceLoss (again), with distance = 1 - similarity
 * alpha, beta are not learned directly, because alpha was being pushed to be negative - we learn `raw_alpha` and `raw_beta` and pass them through a softplus to get alpha, beta for the TverskySim similarity computation
 * added new eval method: use TverskySimilarity to compute all-pairs distance matrix and pass this into t-SNE with `metric="precomputed"` to get a vibe for whether or not TverskySimilarity is learning some structure.
+	* manually starting one kaleido server per run and also turning gradients off for the all-pairs similarity computation sped things up a lot
