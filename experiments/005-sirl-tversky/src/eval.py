@@ -11,7 +11,7 @@ from sklearn.manifold import TSNE
 import plotly.express as px
 from plotly.subplots import make_subplots
 import torch.nn.functional as F
-# from encoders import *
+from encoders import get_sirl
 
 # raw feature columns in data["features"], in order (matches make_tversky_report.py)
 FEATURE_NAMES = ["laptop (computer_dist)", "upright (joint_up)"]
@@ -22,7 +22,7 @@ BASE_COLORS = ["#e0e0e0", "#9e9e9e"]
 SIG_COLORS  = ["#cfe1f2", "#7fb8de", "#3a8bc7", "#1b4f8a"]
 
 
-def eval_model(config, data, model, unix_timestamp):
+def eval_model(config, data, model, seed, unix_timestamp):
     """
     eval
     """
@@ -46,7 +46,7 @@ def eval_model(config, data, model, unix_timestamp):
             }
             all_eval = all_eval | tpa_dict
         if method == "query":
-            query = eval_queries(config, data, model, eval_params=entry, unix_timestamp=unix_timestamp)   # {bank: {feature: ...}}
+            query = eval_queries(config, data, model, eval_params=entry, seed=seed, unix_timestamp=unix_timestamp)   # {bank: {feature: ...}}
             print("QUERY RESULTS")
             for bank_name, bank_query in query.items():        # "proj" and/or "sim"
                 for f_name in FEATURE_NAMES:
@@ -57,7 +57,7 @@ def eval_model(config, data, model, unix_timestamp):
                 all_eval[f"query_{bank_name}"] = bank_query
             all_eval = all_eval | {"query": query}
         if method == "tsne":
-            results_dir = tversky_sim_tsne(config, data, model, unix_timestamp)
+            results_dir = tversky_sim_tsne(config, data, model, seed, unix_timestamp)
             print(f"figures saved into {results_dir}")
     return all_eval
 
@@ -164,6 +164,7 @@ def eval_queries(
         data, 
         model, 
         eval_params=None, 
+        seed=None,
         unix_timestamp=None,
         train_config=None, 
         save_pairs=False, 
@@ -197,31 +198,27 @@ def eval_queries(
     max_pairs        = q_cfg.get("max_pairs", None)   # if set, sample this many (max, min) pairs per feature
     rng              = np.random.default_rng(config.get("seed", 0))
 
-    # TODO pass trajs through trained sirl
-    # # transform all trajs according to encoder
-    # if config["model"]["encoder"] == "pca":
-    #     # use PCA embeds as input
-    #     latent_dim = config["model"]["latent_dim"]
-    #     all_trajs, input_dim = pca(all_trajs, latent_dim)
-    # if config["model"]["encoder"] == "sirl":
-    #     # use SIRL embeds as input
-    #     latent_dim = config["model"]["latent_dim"]
-    #     all_trajs, input_dim = sirl(all_trajs, latent_dim)
-    # if config["model"]["encoder"] == "feats":
-    #     # use ground truth features as input
-    #     all_trajs = all_feats
     trajs_t = torch.as_tensor(all_trajs, dtype=torch.float32)
+
+    # TODO this should not be based on expt name lol
+    expt_name = config["experiment_name"]
+    if expt_name == "frozen_sirl_ts":
+        # use SIRL embeds as input (transform a, p, n trajectories)
+        latent_dim = config["model"]["latent_dim"]
+        encoder = get_sirl(seed, latent_dim) # loads trained sirl checkpoint with no_grad_(True)
+        trajs_t = encoder(trajs_t).detach()
 
     # --- which Tversky feature banks does this model have? ---
     train_config = train_config or config          # falls back to `config` if it holds ["model"]
+    # TODO this should not be based on model name lol
     model_name = train_config["model"]["name"]
-    # TODO change for just tverskysim
     banks_present = {
         "literally_just_tversky_sim":   ["sim_only"],
         "tversky_sirl":   ["sim"],
         "tversky_sirl_2": ["sim", "proj"],
         "tversky_proj":   ["proj"],
         "no_sirl_ts": ["sim_only"],
+        "sirl_ts": ["sim_only"]
     }.get(model_name)
     if banks_present is None:
         raise ValueError(
@@ -415,14 +412,21 @@ def plot_query_stacked_bars(results, expt_name, alphas, results_dir, unix_timest
     return out_path
 
 
-def tversky_sim_tsne(config, data, model, unix_timestamp):
+def tversky_sim_tsne(config, data, model, seed, unix_timestamp):
     expt_name = config["experiment_name"]
 
     all_trajs = data["trajs"]
+    all_trajs = torch.tensor(all_trajs, dtype=torch.float32)
     all_feats = data["features"]
 
-    # TODO add encoder
-    all_dist = model.distance(torch.tensor(all_trajs, dtype=torch.float32), torch.tensor(all_trajs, dtype=torch.float32))
+    # use frozen sirl encoder
+    if expt_name == "frozen_sirl_ts":
+        latent_dim = config["model"]["latent_dim"]
+        encoder = get_sirl(seed, latent_dim) # loads trained sirl checkpoint with no_grad_(True)
+        all_trajs = encoder(all_trajs).detach()
+
+    with torch.no_grad():
+        all_dist = model.distance(all_trajs, all_trajs)
     t_sne = TSNE(
         n_components=2,
         init="random",

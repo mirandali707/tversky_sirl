@@ -1,6 +1,7 @@
-import numpy as np
+import torch
 import wandb
 from ljts_triplet import train_triplet_tversky_sim, random_init_no_training_tversky_sim
+from encoders import get_sirl
 
 def train_model(config, data, results_dir, seed, unix_timestamp):
     """
@@ -14,55 +15,41 @@ def train_model(config, data, results_dir, seed, unix_timestamp):
         model = random_init_no_training_tversky_sim(config)
         ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
-        return model, ckpt_path
+        return model, ckpt_path, "no_run"
 
+    # get (a, p, n) data
+    anchors = data["anchors"]
+    positives = data["positives"]
+    negatives = data["negatives"]
+
+    # init wandb run
     run = wandb.init(
-        # Set the wandb entity where your project will be logged (generally your team name).
         entity="m1randa-massachusetts-institute-of-technology",
-        # Set the wandb project where this run will be logged.
         project="tversky-sirl",
-        # Track hyperparameters and run metadata.
         config=config,
     )
+    run_url = wandb.run.url
 
-    if expt_name == "no_sirl_ts" or expt_name == "tiny": # TODO make this better
-        # TODO this only uses input dim 19, could edit to take different input dims for comparison with e.g. pca, sirl
-        anchors = data["anchors"]
-        positives = data["positives"]
-        negatives = data["negatives"]
-
+    if expt_name == "no_sirl_ts" or expt_name == "tiny":
         model = train_triplet_tversky_sim(config, anchors, positives, negatives, wandb_run=run)
         ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
         model.save_model(ckpt_path)
-
         run.finish()
-        return model, ckpt_path
+        return model, ckpt_path, run_url
 
     if expt_name == "frozen_sirl_ts":
-        # use SIRL embeds as input
+        # use SIRL embeds as input (transform a, p, n trajectories)
         latent_dim = config["model"]["latent_dim"]
-        encoder = get_sirl_encoder
-    # if config["experiment_name"] == "ljts_triplet":
+        encoder = get_sirl(seed, latent_dim) # loads trained sirl checkpoint with no_grad_(True)
+        anchors = encoder(torch.tensor(anchors, dtype=torch.float32)).detach()
+        positives = encoder(torch.tensor(positives, dtype=torch.float32)).detach()
+        negatives = encoder(torch.tensor(negatives, dtype=torch.float32)).detach()
 
-    # hi_trajs, lo_trajs, hi_feats, lo_feats = get_hi_lo_laptop_trajs(data)
-    # input_dim = hi_trajs.shape[1]
-    # # transform trajs with encoder, if specified
-    # if config["model"]["encoder"] == "pca":
-    #     # use PCA embeds as input
-    #     latent_dim = config["model"]["latent_dim"]
-    #     hi_trajs, input_dim = pca(hi_trajs, latent_dim)
-    #     lo_trajs, input_dim = pca(lo_trajs, latent_dim)
-    # if config["model"]["encoder"] == "sirl":
-    #     # use SIRL embeds as input
-    #     latent_dim = config["model"]["latent_dim"]
-    #     hi_trajs, input_dim = sirl(hi_trajs, latent_dim)
-    #     lo_trajs, input_dim = sirl(lo_trajs, latent_dim)
-    # if config["model"]["encoder"] == "feats":
-    #     # use ground truth features as input
-    #     hi_trajs = hi_feats
-    #     lo_trajs = lo_feats
-    #     input_dim = hi_feats.shape[1]
-    # model = train_tversky_sim(config, hi_trajs, lo_trajs, input_dim=input_dim)
-    # ckpt_path = str(results_dir / f"tversky_proj_{unix_timestamp}.pth")
-    # model.save_model(ckpt_path)
-    # return model, ckpt_path
+        model = train_triplet_tversky_sim(config, anchors, positives, negatives, input_dim=latent_dim, wandb_run=run)
+        ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+        run.finish()
+        return model, ckpt_path, run_url
+    
+    run.finish() # we should never get here but just in case
+    return None, None, None

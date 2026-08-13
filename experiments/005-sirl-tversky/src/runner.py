@@ -7,6 +7,7 @@ from utils import *
 from models import train_model
 from eval import eval_model
 import time
+import kaleido
 
 
 def parse_command_line_args():
@@ -45,6 +46,8 @@ def get_all_model_configs(config):
             for combo in itertools.product(*list_values)]
 
 def main(config):
+    # trying to fix kaleido hanging on tsne image gen:
+    kaleido.start_sync_server(timeout=30)
     data = load_data(config)
 
     results_dir = Path("results") / config["experiment_name"]
@@ -70,15 +73,19 @@ def main(config):
             set_all_seeds(seed)
 
             unix_timestamp = int(time.time())
-            model, ckpt_path = train_model(curr_config, data, results_dir, seed, unix_timestamp)
+            model, ckpt_path, run_url = train_model(curr_config, data, results_dir, seed, unix_timestamp)
             row["ckpt_path"] = ckpt_path
+            row["wandb_run_url"] = run_url
 
-            results = eval_model(curr_config, data, model, unix_timestamp)
+            results = eval_model(curr_config, data, model, seed, unix_timestamp)
             row = row | results # add results to row
             rows.append(row)
             results_df = pd.DataFrame(rows)
             results_df.to_csv(results_path, index=False)
     print(f"saved results to {results_path}")
+
+    # trying to fix kaleido hanging on tsne image gen:
+    kaleido.stop_sync_server()
 
 
 if __name__ == '__main__':
