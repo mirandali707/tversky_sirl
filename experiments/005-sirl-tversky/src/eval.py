@@ -207,6 +207,9 @@ def eval_queries(
         latent_dim = config["model"]["latent_dim"]
         encoder = get_sirl(seed, latent_dim) # loads trained sirl checkpoint with no_grad_(True)
         trajs_t = encoder(trajs_t).detach()
+    if expt_name == "sirl_ts":
+        # embed trajs using model's encoder
+        trajs_t = model.encoder(trajs_t).detach()
 
     # --- which Tversky feature banks does this model have? ---
     train_config = train_config or config          # falls back to `config` if it holds ["model"]
@@ -425,6 +428,8 @@ def tversky_sim_tsne(config, data, model, seed, unix_timestamp):
         encoder = get_sirl(seed, latent_dim) # loads trained sirl checkpoint with no_grad_(True)
         all_trajs = encoder(all_trajs).detach()
 
+    # NOTE sirl_ts is not embedded here: SirlTverskySim.similarity() (inside of model.distance()) runs its own
+    # encoder on raw trajectories, so pre-embedding would apply the encoder twice.
     with torch.no_grad():
         all_dist = model.distance(all_trajs, all_trajs)
     t_sne = TSNE(

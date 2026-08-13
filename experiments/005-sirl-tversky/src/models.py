@@ -1,6 +1,7 @@
 import torch
 import wandb
 from ljts_triplet import train_triplet_tversky_sim, random_init_no_training_tversky_sim
+from sirl_ts import train_sirl_tversky_sim
 from encoders import get_sirl
 
 def train_model(config, data, results_dir, seed, unix_timestamp):
@@ -50,6 +51,14 @@ def train_model(config, data, results_dir, seed, unix_timestamp):
         model.save_model(ckpt_path)
         run.finish()
         return model, ckpt_path, run_url
+
+    if expt_name == "sirl_ts":
+        model = train_sirl_tversky_sim(config, anchors, positives, negatives, wandb_run=run)
+        ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+        run.finish()
+        return model, ckpt_path, run_url
+
     
     run.finish() # we should never get here but just in case
     return None, None, None

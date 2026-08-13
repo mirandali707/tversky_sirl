@@ -23,7 +23,15 @@ SIRL -> TverskySim (trained with InfoNCE loss) (from expt 004)
 	* more successfully draws high laptop / upright points close together
 	![](results/frozen_sirl_ts/frozen_sirl_ts_1786635013_tsne_laptop.png)
 	![](results/frozen_sirl_ts/frozen_sirl_ts_1786635013_tsne_upright.png)
-* raw trajectory -> SIRL -> TverskySim end-to-end, all unfrozen
+	* accuracy plateaus around 70% (s_ap > s_an)
+* `sirl_ts.yaml` / `sirl_ts`: raw trajectory -> SIRL -> TverskySim end-to-end, all unfrozen
+	![](figs/sirl_ts_fbank_size.png)
+	* accuracy gets to around 90% (s_ap > s_an) and seems to not have plateaued
+	* but, learned similarity has outliers, doesn't seem as well-conditioned as `frozen_sirl_ts`
+	![](results/sirl_ts/sirl_ts_1786639576_tsne_laptop.png)
+
+compare to tversky proj encoder, regular triplet loss (notably did not use "ratio" + "normalize"):
+![](../003-tversky-methods-all-eval/figs/tversky_proj_fbank_size.png)
 
 # new changes
 * we train TverskySim on (a,p,n) triplets with triplet loss instead of just (hi, lo) pairs with InfoNCE loss so that we can use the whole dataset and use the same data as SIRL
