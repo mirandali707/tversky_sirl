@@ -15,8 +15,8 @@ model:
     intersection_reduction: product
     difference_reduction: substractmatch
     normalize: True
-    symmetric: [True, False] 
-    # margin: 0.05
+    symmetric: False
+    margin: 0.1
 eval:
     - method: query
       max_pairs: 1000

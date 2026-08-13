@@ -27,6 +27,10 @@ class LiterallyJustTverskySim(nn.Module):
             difference_reduction=difference_reduction
         )
         torch.nn.init.uniform_(self.tversky_sim.feature_bank.weight, -1.0, 1.0)
+        self.raw_alpha = nn.Parameter(torch.tensor(-0.43))  # softplus(-0.43) ≈ 0.5
+        self.raw_beta  = nn.Parameter(torch.tensor(-0.43))
+        self.tversky_sim.alpha.requires_grad_(False)         # don't optimize the internal ones
+        self.tversky_sim.beta.requires_grad_(False)
 
         # store constructor args so save_model/load can reconstruct exactly
         self.hparams = {
@@ -39,7 +43,9 @@ class LiterallyJustTverskySim(nn.Module):
         }
     
     def similarity(self, a, b):
-        return self.tversky_sim(a,b)
+        alpha = F.softplus(self.raw_alpha)
+        beta  = F.softplus(self.raw_beta)
+        return self.tversky_sim(a, b, alpha=alpha, beta=beta)
 
     def distance(self, a, b):
         """
@@ -87,6 +93,7 @@ def train_triplet_tversky_sim(
         similarity_model=similarity_model,
         intersection_reduction=intersection_reduction,
         difference_reduction=difference_reduction,
+        normalize=normalize
     ).to(device)
     # print("PARAMS")
     # print(dict(model.named_parameters()).keys())
@@ -130,6 +137,10 @@ def train_triplet_tversky_sim(
                 mean_s_an = s_an.mean()
                 std_s_an = s_an.std()
                 mean_gap_sap_san = (s_ap - s_an).mean()
+                # print("raw alpha", model.raw_alpha.item(), "raw beta", model.raw_beta.item())
+                alpha = F.softplus(model.raw_alpha)
+                beta  = F.softplus(model.raw_beta)
+                # print("functional alpha", alpha, "functional beta", beta)
                 if wandb_run:
                     wandb_run.log({
                         "epoch": epoch, 
@@ -140,7 +151,9 @@ def train_triplet_tversky_sim(
                         "std_s_ap": std_s_ap,
                         "mean_s_an": mean_s_an,
                         "std_s_an": std_s_an,
-                        "mean_gap_sap_san": mean_gap_sap_san
+                        "mean_gap_sap_san": mean_gap_sap_san,
+                        "alpha": alpha,
+                        "beta": beta
                         })
             print(f"Epoch {epoch:4d} | loss={loss.item():.4f} | "
                   f"triplet_acc={acc:.3f} | lr={curr_lr:.5f}")

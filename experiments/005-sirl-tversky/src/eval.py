@@ -10,6 +10,7 @@ from tversky_utils import retrieve_semantic_expression
 from sklearn.manifold import TSNE
 import plotly.express as px
 from plotly.subplots import make_subplots
+import torch.nn.functional as F
 # from encoders import *
 
 # raw feature columns in data["features"], in order (matches make_tversky_report.py)
@@ -25,7 +26,6 @@ def eval_model(config, data, model, unix_timestamp):
     """
     eval
     """
-    print("eval")
     eval_params = config["eval"]
     if isinstance(eval_params, dict):  # single method given as a bare dict
         eval_params = [eval_params]
@@ -355,9 +355,10 @@ def eval_queries(
         fb, iv = bank_feature_and_instances(bank_label)
         results[bank_label] = eval_one_bank(fb, iv)
 
-    results_dir = Path("results") / config["experiment_name"]
-    out_path = plot_query_stacked_bars(results, config["experiment_name"], alphas, results_dir, unix_timestamp)
-    print(f"stacked bars saved to {out_path}")
+    # uncomment to save figure
+    # results_dir = Path("results") / config["experiment_name"]
+    # out_path = plot_query_stacked_bars(results, config["experiment_name"], alphas, results_dir, unix_timestamp)
+    # print(f"stacked bars saved to {out_path}")
 
     return results
 
@@ -421,14 +422,14 @@ def tversky_sim_tsne(config, data, model, unix_timestamp):
     all_feats = data["features"]
 
     # TODO add encoder
-    all_sim = model.similarity(torch.tensor(all_trajs, dtype=torch.float32), torch.tensor(all_trajs, dtype=torch.float32))
+    all_dist = model.distance(torch.tensor(all_trajs, dtype=torch.float32), torch.tensor(all_trajs, dtype=torch.float32))
     t_sne = TSNE(
         n_components=2,
         init="random",
         random_state=0,
-        metric="precomputed" # we pass in pairways similarity matrix
+        metric="precomputed" # we pass in pairways DISTANCE matrix
     )
-    ts_t_sne = t_sne.fit_transform(all_sim.detach().numpy())
+    ts_t_sne = t_sne.fit_transform(all_dist.detach().numpy())
 
     results_dir = Path("results") / expt_name
     results_dir.mkdir(parents=True, exist_ok=True)
