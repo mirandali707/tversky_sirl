@@ -1,6 +1,6 @@
 import numpy as np
 import wandb
-from ljts_triplet import train_triplet_tversky_sim
+from ljts_triplet import train_triplet_tversky_sim, random_init_no_training_tversky_sim
 
 def train_model(config, data, results_dir, seed, unix_timestamp):
     """
@@ -9,6 +9,13 @@ def train_model(config, data, results_dir, seed, unix_timestamp):
     and train just the TverskySimilarity layer with InfoNCE loss on those
     """
     expt_name = config["experiment_name"]
+
+    if expt_name == "random_no_sirl_ts":
+        model = random_init_no_training_tversky_sim(config)
+        ckpt_path = str(results_dir / f"{expt_name}_{unix_timestamp}.pth")
+        model.save_model(ckpt_path)
+        return model, ckpt_path
+
     run = wandb.init(
         # Set the wandb entity where your project will be logged (generally your team name).
         entity="m1randa-massachusetts-institute-of-technology",
@@ -31,6 +38,10 @@ def train_model(config, data, results_dir, seed, unix_timestamp):
         run.finish()
         return model, ckpt_path
 
+    if expt_name == "frozen_sirl_ts":
+        # use SIRL embeds as input
+        latent_dim = config["model"]["latent_dim"]
+        encoder = get_sirl_encoder
     # if config["experiment_name"] == "ljts_triplet":
 
     # hi_trajs, lo_trajs, hi_feats, lo_feats = get_hi_lo_laptop_trajs(data)

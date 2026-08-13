@@ -174,20 +174,17 @@ def random_init_no_training_tversky_sim(
     intersection_reduction='product',
     difference_reduction='ignorematch',
     normalize=False,
-    num_epochs=10000,
-    batch_size=64,
-    lr=0.004,
-    lr_decay=0.99999,
-    tau=0.1,
     device='cuda' if torch.cuda.is_available() else 'cpu',
-    log_interval=100,
 ):
+    print(f"similarity {similarity_model}")
+    print(f"normalize {normalize}")
     model = LiterallyJustTverskySim(
         input_dim=input_dim,
         fbank_size=fbank_size, 
         similarity_model=similarity_model,
         intersection_reduction=intersection_reduction,
         difference_reduction=difference_reduction,
+        normalize=normalize,
     ).to(device)
     return model
 
